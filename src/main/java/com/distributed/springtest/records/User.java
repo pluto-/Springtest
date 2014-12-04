@@ -29,4 +29,12 @@ public class User extends Record {
     public void setCreatedAt(Timestamp createdAt) {
         set("created_at", createdAt);
     }
+
+    public Boolean getIsMan() {
+        return get("is_man", Boolean.class);
+    }
+
+    public void setIsMan(Boolean isMan) {
+        set("is_man", isMan);
+    }
 }

@@ -10,7 +10,6 @@ import java.sql.SQLException;
 public class Generator {
 
     public static void main( String[] args ) throws SQLException {
-
         try {
             com.jajja.jorm.generator.Generator generator = new com.jajja.jorm.generator.Generator();
             generator.addDatabase("springtest", "com.distributed.springtest.records").addSchema("public").addTable("users");
@@ -19,9 +18,5 @@ public class Generator {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        User user = new User();
-        user.setName("Patrik");
-        user.save();
     }
 }
