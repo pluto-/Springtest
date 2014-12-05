@@ -1,4 +1,4 @@
-package test.hello;
+package hello;
 
 public class Greeting {
 
