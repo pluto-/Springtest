@@ -12,6 +12,7 @@
         <module>player_resources</module>
         <module>utils</module>
         <module>gamecontent</module>
+        <module>administrator_web</module>
     </modules>
 
     <parent>

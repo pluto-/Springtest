@@ -12,7 +12,6 @@ public class PropertiesLoader {
     public static String getAddressAndPort() throws IOException {
         String result = "";
         Properties prop = new Properties();
-        System.err.println(System.getProperty("user.dir"));
         String propFileName = "player_resources/src/main/resources/playerresources.properties";
 
         InputStream inputStream = new FileInputStream(propFileName);

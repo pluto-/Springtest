@@ -60,14 +60,14 @@ public class PlayerResourcesController {
     @RequestMapping(value="/player_add_building",  method= RequestMethod.POST)
     public Object addBuilding(@RequestParam(value="player_id") int playerId, @RequestParam(value="building_id") int buildingId) {
 
-        List<Building> buildings = null;
         try {
-            buildings = DatabaseHandler.getPlayerBuildings(playerId);
+            DatabaseHandler.addBuilding(playerId, buildingId);
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<Object>("Failed", HttpStatus.BAD_REQUEST);
         }
-        return buildings;
+
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     private void updatePlayerResources(int playerId) throws SQLException, IOException {
@@ -80,11 +80,11 @@ public class PlayerResourcesController {
             long differenceMilli = currentTime - lastUpdated;
             long differenceSec = Math.round(differenceMilli / 1000);
             for(BuildingInfo buildingInfo : buildingsInfo) {
-                if(buildingInfo.getId() == building.getBuildingId()) {
+                if(buildingInfo.getId().equals(building.getBuildingId())) {
                     int amountPerSecond = buildingInfo.getGeneratedAmount();
                     int nrOfBuildings = building.getAmount();
                     for(Resource resource : resources) {
-                        if(resource.getResourceId() == buildingInfo.getGeneratedId()) {
+                        if(resource.getResourceId().equals(buildingInfo.getGeneratedId())) {
 
                             building.setLastUpdated(new Timestamp(currentTime));
                             resource.setAmount(resource.getAmount() + (int) (nrOfBuildings * amountPerSecond * differenceSec));
@@ -103,9 +103,5 @@ public class PlayerResourcesController {
         String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
         BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
         return Arrays.asList(buildingInfos);
-        /*
-        List<BuildingInfo> buildingInfo = new ArrayList<BuildingInfo>();
-        buildingInfo.add(new BuildingInfo(1, "Lumber Mill", 1, 5));
-        return buildingInfo;*/
     }
 }
