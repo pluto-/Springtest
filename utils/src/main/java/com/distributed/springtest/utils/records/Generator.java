@@ -1,4 +1,4 @@
-package com.distributed.springtest.gamecontent;
+package com.distributed.springtest.utils.records;
 
 import java.sql.SQLException;
 
