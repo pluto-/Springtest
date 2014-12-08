@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Created by Jonas on 2014-12-05.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class BuildingInfo {
 
     public BuildingInfo(int id, String name, int produces_resource_id, int produces_resource_amount) {
