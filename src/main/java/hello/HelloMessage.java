@@ -1,4 +1,4 @@
-package test2.hello;
+package hello;
 
 /**
  * Created by Jonas on 2014-12-08.
