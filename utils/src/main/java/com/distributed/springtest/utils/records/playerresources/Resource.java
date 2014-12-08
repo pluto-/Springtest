@@ -1,4 +1,4 @@
-package records.playerresources;
+package com.distributed.springtest.utils.records.playerresources;
 
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;

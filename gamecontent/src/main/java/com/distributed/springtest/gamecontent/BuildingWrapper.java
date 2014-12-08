@@ -1,7 +1,7 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.gamecontent.records.Building;
-import com.distributed.springtest.gamecontent.records.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.Building;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 
 import java.util.List;
 

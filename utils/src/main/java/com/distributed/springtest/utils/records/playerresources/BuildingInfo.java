@@ -1,4 +1,4 @@
-package records.playerresources;
+package com.distributed.springtest.utils.records.playerresources;
 
 /**
  * Created by Jonas on 2014-12-05.
