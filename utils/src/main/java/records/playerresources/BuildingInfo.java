@@ -1,4 +1,4 @@
-package player;
+package records.playerresources;
 
 /**
  * Created by Jonas on 2014-12-05.

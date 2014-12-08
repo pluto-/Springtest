@@ -3,8 +3,8 @@ package database;
 import java.sql.SQLException;
 import java.util.List;
 
-import player.Building;
-import player.Resource;
+import records.playerresources.Building;
+import records.playerresources.Resource;
 
 /**
  * Created by Jonas on 2014-12-05.

@@ -1,4 +1,4 @@
-package player;
+package records.playerresources;
 
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;

@@ -3,15 +3,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import player.Building;
-import player.Resource;
-import player.BuildingInfo;
+import records.playerresources.Building;
+import records.playerresources.Resource;
+import records.playerresources.BuildingInfo;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -98,7 +96,7 @@ public class PlayerResourcesController {
 
     private List<BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getAddressAndPort();
+        String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
         List<BuildingInfo> buildings = restTemplate.getForObject(uri, List.class);
         return buildings;
 
