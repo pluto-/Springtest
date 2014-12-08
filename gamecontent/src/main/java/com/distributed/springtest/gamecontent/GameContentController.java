@@ -3,6 +3,7 @@ package com.distributed.springtest.gamecontent;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
+import com.distributed.springtest.utils.records.playerresources.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,4 +71,11 @@ public class GameContentController {
         resourceInfo.transaction().commit();
         return resourceInfo.getId();
     }
+
+    @RequestMapping("/getResources")
+    public ResponseEntity<List<Resource>> getResources() throws SQLException {
+        List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources");
+        return new ResponseEntity<List<Resource>>(resources, HttpStatus.OK);
+    }
+
 }

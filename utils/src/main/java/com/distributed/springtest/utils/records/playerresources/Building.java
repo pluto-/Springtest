@@ -1,9 +1,11 @@
 package com.distributed.springtest.utils.records.playerresources;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 import java.sql.Timestamp;
 
+@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
 @Jorm(database="player_resources", schema="public", table="buildings", primaryKey="player_id")
 public class Building extends Record {
     public Integer getPlayerId() {
