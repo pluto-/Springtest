@@ -1,8 +1,8 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.gamecontent.records.Building;
-import com.distributed.springtest.gamecontent.records.BuildingCost;
-import com.distributed.springtest.gamecontent.records.Resource;
+import com.distributed.springtest.utils.records.gamecontent.Building;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

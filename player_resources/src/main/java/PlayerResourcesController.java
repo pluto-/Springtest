@@ -3,9 +3,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import records.playerresources.Building;
-import records.playerresources.Resource;
-import records.playerresources.BuildingInfo;
+import com.distributed.springtest.utils.records.playerresources.Building;
+import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.distributed.springtest.utils.records.playerresources.BuildingInfo;
 
 import java.io.IOException;
 import java.sql.SQLException;
