@@ -2,11 +2,13 @@ import database.DatabaseHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import player.Building;
 import player.Resource;
 import player.BuildingInfo;
 
 import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class PlayerResourcesController {
         try {
             updatePlayerResources(playerId);
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -64,7 +68,7 @@ public class PlayerResourcesController {
         return buildings;
     }
 
-    private void updatePlayerResources(int playerId) throws SQLException {
+    private void updatePlayerResources(int playerId) throws SQLException, IOException {
         List<Resource> resources = DatabaseHandler.getPlayerResources(playerId);
         List<Building> buildings = DatabaseHandler.getPlayerBuildings(playerId);
         List<BuildingInfo> buildingsInfo = getBuildingsInfo();
@@ -92,11 +96,15 @@ public class PlayerResourcesController {
         DatabaseHandler.setPlayerBuildings(playerId, buildings);
     }
 
-    private List<BuildingInfo> getBuildingsInfo() {
-        //todo: FRÅGA PATRIKS GAME CONTENT SERVER.
+    private List<BuildingInfo> getBuildingsInfo() throws IOException {
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getAddressAndPort();
+        List<BuildingInfo> buildings = restTemplate.getForObject(uri, List.class);
+        return buildings;
 
+        /*
         List<BuildingInfo> buildingInfo = new ArrayList<BuildingInfo>();
         buildingInfo.add(new BuildingInfo(1, "Lumber Mill", 1, 5));
-        return buildingInfo;
+        return buildingInfo;*/
     }
 }
