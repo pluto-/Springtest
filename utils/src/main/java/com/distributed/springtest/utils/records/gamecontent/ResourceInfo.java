@@ -3,7 +3,7 @@ package com.distributed.springtest.utils.records.gamecontent;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
-@Jorm(database= "com/distributed/springtest/utils/records/gamecontent", schema="public", table="resources", primaryKey="id")
+@Jorm(database= "gamecontent", schema="public", table="resources", primaryKey="id")
 public class ResourceInfo extends Record {
     public Integer getId() {
         return get("id", Integer.class);
