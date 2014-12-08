@@ -1,6 +1,6 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.utils.records.gamecontent.Building;
+import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 
 import java.util.List;
@@ -10,15 +10,15 @@ import java.util.List;
  */
 public class BuildingWrapper {
 
-    private Building building;
+    private BuildingInfo buildingInfo;
     private List<BuildingCost> buildingCosts;
 
-    public Building getBuilding() {
-        return building;
+    public BuildingInfo getBuildingInfo() {
+        return buildingInfo;
     }
 
-    public void setBuilding(Building building) {
-        this.building = building;
+    public void setBuildingInfo(BuildingInfo buildingInfo) {
+        this.buildingInfo = buildingInfo;
     }
 
     public List<BuildingCost> getBuildingCosts() {

@@ -4,7 +4,7 @@ import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
 @Jorm(database= "com/distributed/springtest/utils/records/gamecontent", schema="public", table="buildings", primaryKey="id")
-public class Building extends Record {
+public class BuildingInfo extends Record {
     public Integer getId() {
         return get("id", Integer.class);
     }

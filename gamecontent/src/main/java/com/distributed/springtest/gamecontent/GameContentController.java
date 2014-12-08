@@ -1,8 +1,8 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.utils.records.gamecontent.Building;
+import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
-import com.distributed.springtest.utils.records.gamecontent.Resource;
+import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,16 +17,16 @@ import java.util.List;
 public class GameContentController {
 
     @RequestMapping("/getBuildings")
-    public ResponseEntity<List<Building>> getBuildings() throws SQLException {
-        List<Building> buildings = Building.selectAll(Building.class, "SELECT * FROM buildings");
+    public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
+        List<BuildingInfo> buildingInfos = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
 
-        return new ResponseEntity<List<Building>>(buildings, HttpStatus.OK);
+        return new ResponseEntity<List<BuildingInfo>>(buildingInfos, HttpStatus.OK);
     }
 
     @RequestMapping("/getBuilding/{id}")
-    public ResponseEntity<Building> getBuilding(@PathVariable Integer id) throws SQLException {
-        Building building = Building.findById(Building.class, id);
-        return new ResponseEntity<Building>(building, HttpStatus.OK);
+    public ResponseEntity<BuildingInfo> getBuilding(@PathVariable Integer id) throws SQLException {
+        BuildingInfo buildingInfo = BuildingInfo.findById(BuildingInfo.class, id);
+        return new ResponseEntity<BuildingInfo>(buildingInfo, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/addBuilding", method = RequestMethod.POST)
@@ -35,12 +35,12 @@ public class GameContentController {
                   @RequestParam("generatedResourceAmount") Integer generatedResourceAmount) throws SQLException {
                   */
     public Integer addBuilding(@RequestBody BuildingWrapper buildingWrapper) throws SQLException {
-        Building incomingBuilding = buildingWrapper.getBuilding();
-        Building building = new Building();
-        building.setName(incomingBuilding.getName());
-        building.setGeneratedId(incomingBuilding.getGeneratedId());
-        building.setGeneratedAmount(incomingBuilding.getGeneratedAmount());
-        building.save();
+        BuildingInfo incomingBuildingInfo = buildingWrapper.getBuildingInfo();
+        BuildingInfo buildingInfo = new BuildingInfo();
+        buildingInfo.setName(incomingBuildingInfo.getName());
+        buildingInfo.setGeneratedId(incomingBuildingInfo.getGeneratedId());
+        buildingInfo.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
+        buildingInfo.save();
         List<BuildingCost> buildingCosts = buildingWrapper.getBuildingCosts();
         for(BuildingCost incomingBuildingCost : buildingCosts) {
             BuildingCost buildingCost = new BuildingCost();
@@ -49,8 +49,8 @@ public class GameContentController {
             buildingCost.setAmount(incomingBuildingCost.getAmount());
             buildingCost.save();
         }
-        building.transaction().commit();
-        return building.getId();
+        buildingInfo.transaction().commit();
+        return buildingInfo.getId();
     }
 
     @RequestMapping("/setBuildingCost")
@@ -63,11 +63,11 @@ public class GameContentController {
     }
 
     @RequestMapping("/addResource")
-    public Integer addResource(@RequestBody Resource incomingResource) throws SQLException {
-        Resource resource = new Resource();
-        resource.setName(incomingResource.getName());
-        resource.save();
-        resource.transaction().commit();
-        return resource.getId();
+    public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setName(incomingResourceInfo.getName());
+        resourceInfo.save();
+        resourceInfo.transaction().commit();
+        return resourceInfo.getId();
     }
 }
