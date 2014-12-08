@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>com.distributed.springtest.gamecontent</artifactId>
+    <artifactId>gamecontent</artifactId>
 
     <dependencies>
         <dependency>
