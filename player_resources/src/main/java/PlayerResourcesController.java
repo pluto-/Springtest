@@ -1,3 +1,4 @@
+import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import database.DatabaseHandler;
@@ -56,18 +57,24 @@ public class PlayerResourcesController {
         return buildings;
     }
 
+    @RequestMapping(value="/player_buy_building",  method= RequestMethod.POST)
+    public Object buyBuilding(@RequestParam(value="player_id") int playerId, @RequestParam(value="building_id") int buildingId) {
+        if(hasEnoughMaterials(playerId, buildingId)) {
+            try {
+                DatabaseHandler.constructBuilding(playerId, buildingId);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-    @RequestMapping(value="/player_add_building",  method= RequestMethod.POST)
-    public Object addBuilding(@RequestParam(value="player_id") int playerId, @RequestParam(value="building_id") int buildingId) {
-
-        try {
-            DatabaseHandler.addBuilding(playerId, buildingId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ResponseEntity<Object>("Failed", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<Object>(HttpStatus.OK);
         }
+        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
-        return new ResponseEntity<Object>(HttpStatus.OK);
+    private boolean hasEnoughMaterials(int playerId, int buildingId) {
+
+        return false;
     }
 
     private void updatePlayerResources(int playerId) throws SQLException, IOException {
@@ -103,5 +110,12 @@ public class PlayerResourcesController {
         String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
         BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
         return Arrays.asList(buildingInfos);
+    }
+
+    private List<BuildingCost> getBuildingCost(int buildingId) throws IOException {
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getAddressAndPort() + "/getBuildingCost/" + buildingId;
+        BuildingCost[] buildingCosts = restTemplate.getForObject(uri, BuildingCost[].class);
+        return Arrays.asList(buildingCosts);
     }
 }
