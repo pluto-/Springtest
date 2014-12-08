@@ -1,8 +1,10 @@
 package com.distributed.springtest.utils.records.gamecontent;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
+@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
 @Jorm(database= "gamecontent", schema="public", table="building_costs", primaryKey="building_id")
 public class BuildingCost extends Record {
     public Integer getBuildingId() {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
 @Jorm(database= "gamecontent", schema="public", table="buildings", primaryKey="id")
 public class BuildingInfo extends Record {
     public Integer getId() {
