@@ -1,15 +1,19 @@
+import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import database.DatabaseHandler;
+import oracle.jrockit.jfr.settings.JSONElement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
-import com.distributed.springtest.utils.records.playerresources.BuildingInfo;
+import sun.org.mozilla.javascript.internal.json.JsonParser;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -77,10 +81,10 @@ public class PlayerResourcesController {
             long differenceSec = Math.round(differenceMilli / 1000);
             for(BuildingInfo buildingInfo : buildingsInfo) {
                 if(buildingInfo.getId() == building.getBuildingId()) {
-                    int amountPerSecond = buildingInfo.getProduces_resource_amount();
+                    int amountPerSecond = buildingInfo.getGeneratedAmount();
                     int nrOfBuildings = building.getAmount();
                     for(Resource resource : resources) {
-                        if(resource.getResourceId() == buildingInfo.getProduces_resource_id()) {
+                        if(resource.getResourceId() == buildingInfo.getGeneratedId()) {
 
                             building.setLastUpdated(new Timestamp(currentTime));
                             resource.setAmount(resource.getAmount() + (int) (nrOfBuildings * amountPerSecond * differenceSec));
@@ -97,9 +101,8 @@ public class PlayerResourcesController {
     private List<BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
-        List<BuildingInfo> buildings = restTemplate.getForObject(uri, List.class);
-        return buildings;
-
+        BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
+        return Arrays.asList(buildingInfos);
         /*
         List<BuildingInfo> buildingInfo = new ArrayList<BuildingInfo>();
         buildingInfo.add(new BuildingInfo(1, "Lumber Mill", 1, 5));
