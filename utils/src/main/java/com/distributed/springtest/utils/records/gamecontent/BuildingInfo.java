@@ -39,11 +39,11 @@ public class BuildingInfo extends Record {
         set("generated_id", generatedId);
     }
 
-    public Integer getGeneratedAmount() {
-        return get("generated_amount", Integer.class);
+    public Float getGeneratedAmount() {
+        return get("generated_amount", Float.class);
     }
 
-    public void setGeneratedAmount(Integer generatedAmount) {
+    public void setGeneratedAmount(Float generatedAmount) {
         set("generated_amount", generatedAmount);
     }
 }
