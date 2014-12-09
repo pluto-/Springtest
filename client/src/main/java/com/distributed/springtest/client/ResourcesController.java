@@ -50,4 +50,20 @@ public class ResourcesController {
         resource.transaction().commit();
         return new RedirectView("/resources/");
     }
+
+    @RequestMapping(value = "/new", method = RequestMethod.GET)
+    public Object newResource() throws SQLException {
+        ModelAndView modelAndView = new ModelAndView("editResource");
+        modelAndView.addObject("edit", false);
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    public Object newResourcex(@ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException {
+        ResourceInfo resource = new ResourceInfo();
+        resource.setName(form.getName());
+        resource.save();
+        resource.transaction().commit();
+        return new RedirectView("/resources");
+    }
 }
