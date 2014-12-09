@@ -55,7 +55,7 @@ public class BuildingsController {
         building.setGeneratedAmount(form.getGeneratedAmount());
         building.save();
         building.transaction().commit();
-        return new RedirectView("/buildings/" + id);
+        return new RedirectView("/buildings");
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
