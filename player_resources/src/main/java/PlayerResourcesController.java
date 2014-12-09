@@ -1,15 +1,13 @@
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.distributed.springtest.utils.records.playerresources.Construction;
 import database.DatabaseHandler;
-import oracle.jrockit.jfr.settings.JSONElement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
-import sun.org.mozilla.javascript.internal.json.JsonParser;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,23 +22,17 @@ import java.util.concurrent.atomic.AtomicLong;
 @RestController
 public class PlayerResourcesController {
 
-    private final AtomicLong counter = new AtomicLong();
-
     @RequestMapping("/player_resources")
     public Object getPlayerResources(@RequestParam(value="player_id") int playerId) {
-        try {
-            updatePlayerResources(playerId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         List<Resource> resources = null;
         try {
+
+            updatePlayerResources(playerId);
             resources = DatabaseHandler.getPlayerResources(playerId);
-        } catch (SQLException e) {
+
+        }  catch (SQLException | IOException e) {
             e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return resources;
     }
@@ -53,28 +45,78 @@ public class PlayerResourcesController {
             buildings = DatabaseHandler.getPlayerBuildings(playerId);
         } catch (SQLException e) {
             e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return buildings;
     }
 
     @RequestMapping(value="/player_buy_building",  method= RequestMethod.POST)
     public Object buyBuilding(@RequestParam(value="player_id") int playerId, @RequestParam(value="building_id") int buildingId) {
-        if(hasEnoughMaterials(playerId, buildingId)) {
+        List<BuildingCost> costs = null;
+        List<Resource> playerResources = null;
+        try {
+            costs = getBuildingCost(buildingId);
+            playerResources = DatabaseHandler.getPlayerResources(playerId);
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(hasEnoughMaterials(playerResources, costs)) {
+
+            Construction construction = new Construction();
             try {
-                DatabaseHandler.constructBuilding(playerId, buildingId);
+                // Removing costs from playerResources list.
+                for (BuildingCost cost : costs) {
+                    for (Resource resource : playerResources) {
+                        if (resource.getResourceId().equals(cost.getResourceId())) {
+                            resource.setAmount(resource.getAmount() - cost.getAmount());
+                            resource.save();
+                        }
+                    }
+                }
+
+                construction.setPlayerId(playerId);
+                construction.setBuildingId(buildingId);
+                construction.save();
+            } catch(SQLException e) {
+                e.printStackTrace();
+                return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            try {
+                construction.transaction().commit();
             } catch (SQLException e) {
+                construction.transaction().close();
                 e.printStackTrace();
                 return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<Object>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<Object>("Not enough resources.", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    private boolean hasEnoughMaterials(int playerId, int buildingId) {
+    private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCost> costs) {
 
-        return false;
+        boolean isEnough;
+        for(BuildingCost cost : costs) {
+            isEnough = false;
+
+            for(Resource resource : playerResources) {
+                if(resource.getResourceId().equals(cost.getResourceId())) {
+                    if(resource.getAmount() >= cost.getAmount()) {
+                        isEnough = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!isEnough) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void updatePlayerResources(int playerId) throws SQLException, IOException {
@@ -101,6 +143,38 @@ public class PlayerResourcesController {
                 }
             }
         }
+
+        // Check finished constructions.
+        List<Construction> constructions = Construction.selectAll(Construction.class, "SELECT * FROM construction WHERE player_id = #1#", playerId);
+        for(Construction construction : constructions) {
+            for(BuildingInfo buildingInfo : buildingsInfo) {
+                if(buildingInfo.getId().equals(construction.getBuildingId())) {
+                    if((int)((currentTime - construction.getStartedAt().getTime()) / 1000) >= buildingInfo.getBuildtime()) {
+
+                        // Increase the resource.
+                        for(Resource resource : resources) {
+                            if(resource.getResourceId().equals(buildingInfo.getGeneratedId())) {
+                                long timeFinishedConstruction = construction.getStartedAt().getTime() + buildingInfo.getBuildtime();
+                                int generatedAmount = (int)((currentTime - timeFinishedConstruction)/1000) * buildingInfo.getGeneratedAmount();
+                                resource.setAmount(resource.getAmount() + generatedAmount);
+                            }
+                            break;
+                        }
+
+                        // Move to Buildings.
+                        for(Building building : buildings) {
+                            if(building.getBuildingId().equals(construction.getBuildingId())) {
+                                building.setAmount(building.getAmount() + 1);
+                                break;
+                            }
+                        }
+                        Construction.deleteById(Construction.class, construction.getId());
+                    }
+                    break;
+                }
+            }
+        }
+
         DatabaseHandler.setPlayerResources(playerId, resources);
         DatabaseHandler.setPlayerBuildings(playerId, buildings);
     }
