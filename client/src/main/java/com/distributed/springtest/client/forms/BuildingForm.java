@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
  */
 public class BuildingForm {
 
-    @NotNull
     private Integer id;
 
     @NotNull

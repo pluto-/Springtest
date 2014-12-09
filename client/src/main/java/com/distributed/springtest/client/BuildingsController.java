@@ -28,7 +28,7 @@ public class BuildingsController {
     @RequestMapping("")
     public Object buildings() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("buildings");
-        List<BuildingInfo> buildings = Building.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
+        List<BuildingInfo> buildings = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
         modelAndView.addObject("buildings", buildings);
         return modelAndView;
     }
@@ -36,12 +36,13 @@ public class BuildingsController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getBuilding(@PathVariable Integer id) throws SQLException {
         ModelAndView modelAndView = new ModelAndView("editBuilding");
-        BuildingInfo building = Building.findById(BuildingInfo.class, id);
+        BuildingInfo building = BuildingInfo.findById(BuildingInfo.class, id);
         List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs b WHERE building_id = #1#", id);
         List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
         modelAndView.addObject("building", building);
         modelAndView.addObject("buildingCosts", buildingCosts);
         modelAndView.addObject("resources", resources);
+        modelAndView.addObject("edit", true);
         return modelAndView;
     }
 
@@ -55,5 +56,26 @@ public class BuildingsController {
         building.save();
         building.transaction().commit();
         return new RedirectView("/buildings/" + id);
+    }
+
+    @RequestMapping(value = "/new", method = RequestMethod.GET)
+    public Object newBuilding() throws SQLException {
+        ModelAndView modelAndView = new ModelAndView("editBuilding");
+        List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
+        modelAndView.addObject("edit", false);
+        modelAndView.addObject("resources", resources);
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    public Object newBuildingx(@ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
+        BuildingInfo building = new BuildingInfo();
+        building.setName(form.getName());
+        building.setBuildtime(form.getBuildtime());
+        building.setGeneratedId(form.getGeneratedId());
+        building.setGeneratedAmount(form.getGeneratedAmount());
+        building.save();
+        building.transaction().commit();
+        return new RedirectView("/buildings");
     }
 }
