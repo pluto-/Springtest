@@ -2,10 +2,12 @@
     <div class="col-md-12">
         <legend>Resources</legend>
         <form role="form" class="form" method="post">
-            <div class="form-group">
-                <label for="inputId">Resource ID: </label>
-                <input type="text" id="inputId" name="id" placeholder="Resource ID" value="$esc.html($resource.id)">
-            </div>
+            #if($edit == true)
+                <div class="form-group">
+                    <label for="inputId">Resource ID: </label>
+                    <input type="text" id="inputId" name="id" placeholder="Resource ID" value="$esc.html($resource.id)" disabled>
+                </div>
+            #end
             <div class="form-group">
                 <label for="inputName">Resource Name: </label>
                 <input type="text" id="inputName" name="name" placeholder="Resource name" value="$esc.html($resource.name)">
