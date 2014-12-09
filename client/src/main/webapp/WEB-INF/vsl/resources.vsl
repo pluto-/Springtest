@@ -1,0 +1,23 @@
+<div class="row">
+    <div class="col-md-12">
+        <legend>Resources</legend>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Resource id</th>
+                <th>Resource name</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($resource in $resources)
+                <tr>
+                    <td>$resource.id</td>
+                    <td>$resource.name</td>
+                    <td><a href="$link.setRelative("resources/$resource.id")">edit</a></td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+</div>
