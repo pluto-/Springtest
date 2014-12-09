@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>Hello</title>
+</head>
+<body>
+<h1>Resources</h1>
+<br/>
+<a href="$link.setRelative("buildings")">Buildings</a>
+<a href="$link.setRelative("resources")">Resources</a>
+
+</body>
+
+</html>

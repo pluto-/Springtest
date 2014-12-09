@@ -1,16 +1,18 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
-import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.jajja.jorm.Database;
+import com.jajja.jorm.Transaction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -58,7 +60,7 @@ public class GameContentController {
         return buildingInfo.getId();
     }
 
-    @RequestMapping("/modifyBuilding")
+    @RequestMapping(value = "/modifyBuilding", method = RequestMethod.PUT)
     public Integer modifyBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
         BuildingInfo buildingInfo = Building.findById(BuildingInfo.class, incomingBuildingInfo.getId());
@@ -69,26 +71,26 @@ public class GameContentController {
         List<BuildingCost> buildingCosts = buildingInfoWrapper.getBuildingCosts();
         List<BuildingCost> currentBuildingCosts = BuildingCost.selectAll(BuildingCost.class,
                 "SELECT * FROM building_costs WHERE building_id = #1#", buildingInfo.getId());
-        List<BuildingCost> temporaryDeleteList = new ArrayList<BuildingCost>(currentBuildingCosts);
-        currentBuildingCosts.removeAll(buildingCosts);
-        buildingCosts.removeAll(temporaryDeleteList);
-        System.out.println(buildingCosts.size());
-        for(BuildingCost incomingBuildingCost : buildingCosts) {
-            BuildingCost buildingCost = new BuildingCost();
-            buildingCost.setResourceId(incomingBuildingCost.getResourceId());
-            buildingCost.setBuildingId(incomingBuildingCost.getBuildingId());
-            buildingCost.setAmount(incomingBuildingCost.getAmount());
-            buildingCost.save();
-        }
-        for(BuildingCost buildingCost : currentBuildingCosts) {
+        List<BuildingCost> buildingCostsForRemoval = new ArrayList<BuildingCost>(currentBuildingCosts);
+        buildingCostsForRemoval.removeAll(buildingCosts);
+        for(BuildingCost buildingCost : buildingCostsForRemoval) {
             buildingCost.delete();
+        }
+        for(BuildingCost incomingBuildingCost : buildingCosts) {
+            BuildingCost buildingCost = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", buildingInfoWrapper.getBuildingInfo().getId(), incomingBuildingCost.getResourceId());
+            if(buildingCost == null) {
+                buildingCost = new BuildingCost();
+            }
+            buildingCost.setResourceId(incomingBuildingCost.getResourceId());
+            buildingCost.setBuildingId(buildingInfoWrapper.getBuildingInfo().getId());
+            buildingCost.setAmount(incomingBuildingCost.getAmount());
             buildingCost.save();
         }
         buildingInfo.transaction().commit();
         return buildingInfo.getId();
     }
 
-    @RequestMapping("/addResource")
+    @RequestMapping(value = "/addResource", method = RequestMethod.POST)
     public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setName(incomingResourceInfo.getName());
@@ -105,7 +107,7 @@ public class GameContentController {
 
     @RequestMapping("/getBuildingsAndCosts")
     public ResponseEntity<List<BuildingInfoWrapper>> getBuildingsAndCosts() throws SQLException {
-        List<BuildingInfoWrapper> resultList = new ArrayList<BuildingInfoWrapper>();
+        List<BuildingInfoWrapper> resultList = new LinkedList<BuildingInfoWrapper>();
         List<BuildingInfo> buildingInfoList = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
         for(BuildingInfo buildingInfo : buildingInfoList) {
             List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1#", buildingInfo.getId());

@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-md-12">
+        <legend>Buildings</legend>
+        <form role="form" class="form" method="post">
+            <div class="form-group">
+                <label for="inputId">Building ID: </label>
+                <input type="text" id="inputId" name="id" placeholder="Building ID" value="$esc.html($building.id)">
+            </div>
+            <div class="form-group">
+                <label for="inputName">Building Name: </label>
+                <input type="text" id="inputName" name="name" placeholder="Building name" value="$esc.html($building.name)">
+            </div>
+            <div class="form-group">
+                <label for="inputBuildtime">Buildtime: </label>
+                <input type="text" id="inputBuildtime" name="buildtime" placeholder="Buildtime" value="$esc.html($building.buildtime)">
+            </div>
+            <div class="form-group">
+                <label for="inputGeneratedResource">Generated Resource</label>
+                <select type="text" class="form-control" id="inputGeneratedResource" name="generatedId">
+                    #foreach($resource in $resources)
+                        <option value=$resource.id #if($building.generated_id.equals($resource.id))selected#end>$resource.id: $resource.name</option>
+                    #end
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="inputGeneratedAmount">Generated Amount: </label>
+                <input type="text" id="inputGeneratedAmount" name="generatedAmount" placeholder="Generated Amount" value="$esc.html($building.generated_amount)">
+            </div>
+            <button type="submit" class="button">Save</button>
+        </form>
+    </div>
+</div>
