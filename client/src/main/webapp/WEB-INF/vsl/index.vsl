@@ -3,7 +3,7 @@
     <title>Hello</title>
 </head>
 <body>
-<h1>Resources</h1>
+<h1>Admin</h1>
 <br/>
 <a href="$link.setRelative("buildings")">Buildings</a>
 <a href="$link.setRelative("resources")">Resources</a>
