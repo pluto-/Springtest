@@ -1,6 +1,7 @@
 package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.forms.BuildingForm;
+import com.distributed.springtest.client.forms.ResourceForm;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
@@ -42,11 +43,11 @@ public class ResourcesController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
+    public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException {
         ResourceInfo resource = ResourceInfo.findById(ResourceInfo.class, id);
         resource.setName(form.getName());
         resource.save();
         resource.transaction().commit();
-        return new RedirectView("/resources/" + id);
+        return new RedirectView("/resources/");
     }
 }
