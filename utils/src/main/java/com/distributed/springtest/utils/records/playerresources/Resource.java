@@ -1,10 +1,8 @@
 package com.distributed.springtest.utils.records.playerresources;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
-@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
 @Jorm(database="player_resources", schema="public", table="resources", primaryKey="player_id")
 public class Resource extends Record {
     public Integer getPlayerId() {
@@ -23,11 +21,11 @@ public class Resource extends Record {
         set("resource_id", resourceId);
     }
 
-    public Integer getAmount() {
-        return get("amount", Integer.class);
+    public Double getAmount() {
+        return get("amount", Double.class);
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(Double amount) {
         set("amount", amount);
     }
 }
