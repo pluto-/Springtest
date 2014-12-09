@@ -1,0 +1,29 @@
+<div class="row">
+    <div class="col-md-12">
+        <legend>Buildings</legend>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Building id</th>
+                <th>Building name</th>
+                <th>Buildtime</th>
+                <th>Resource generated</th>
+                <th>Amount generated</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($building in $buildings)
+                <tr>
+                    <td>$building.id</td>
+                    <td>$building.name</td>
+                    <td>$building.buildtime</td>
+                    <td>$building.generated_id</td>
+                    <td>$building.generated_amount</td>
+                    <td><a href="$link.setRelative("buildings/$building.id")">edit</a></td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+</div>

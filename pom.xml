@@ -13,6 +13,7 @@
         <module>utils</module>
         <module>gamecontent</module>
         <module>administrator_web</module>
+        <module>client</module>
     </modules>
 
     <parent>

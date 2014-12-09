@@ -30,4 +30,16 @@ public class BuildingCost extends Record {
     public void setAmount(Integer amount) {
         set("amount", amount);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if((o == null) || !(o instanceof BuildingCost)){
+            return false;
+        } else {
+            return ((BuildingCost) o).getBuildingId().equals(this.getBuildingId()) &&
+                    ((BuildingCost) o).getAmount().equals(this.getAmount()) &&
+                    ((BuildingCost) o).getResourceId().equals(this.getResourceId());
+        }
+    }
+
 }

@@ -40,7 +40,8 @@ public class BuildingInfoWrapper {
         this.buildingCosts = buildingCosts;
     }
 
-    public void addCost(BuildingCost buildingCost) {
-        buildingCosts.add(buildingCost);
+    public void addCost(BuildingCost buildingCostInfo) {
+        buildingCosts.add(buildingCostInfo);
     }
+
 }
