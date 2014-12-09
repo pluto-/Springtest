@@ -26,7 +26,7 @@ import java.util.List;
 @RequestMapping("/resources")
 public class ResourcesController {
 
-    @RequestMapping("")
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public Object resources() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("resources");
         List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
@@ -58,7 +58,7 @@ public class ResourcesController {
         return modelAndView;
     }
 
-    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public Object newResourcex(@ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException {
         ResourceInfo resource = new ResourceInfo();
         resource.setName(form.getName());

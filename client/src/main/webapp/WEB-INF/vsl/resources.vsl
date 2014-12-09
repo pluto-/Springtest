@@ -19,5 +19,13 @@
                 #end
             </tbody>
         </table>
+        <legend>New resource</legend>
+        <form role="form" class="form" method="post">
+            <div class="form-group">
+                <label for="inputName">Resource name: </label>
+                <input type="text" id="inputName" name="name" placeholder="Name" >
+            </div>
+            <button type="submit" class="button">Create new resource</button>
+        </form>
     </div>
 </div>

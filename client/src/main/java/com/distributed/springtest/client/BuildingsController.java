@@ -28,7 +28,7 @@ public class BuildingsController {
     @RequestMapping("")
     public Object buildings() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("buildings");
-        List<BuildingInfo> buildings = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
+        List<BuildingInfo> buildings = BuildingInfo.selectAll(BuildingInfo.class, "SELECT b.*, r.name as resource_name FROM buildings b, resources r WHERE b.generated_id = r.id");
         modelAndView.addObject("buildings", buildings);
         return modelAndView;
     }
