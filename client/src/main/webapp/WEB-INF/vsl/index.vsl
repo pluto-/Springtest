@@ -6,11 +6,6 @@
 <h1>Admin</h1>
 <br/>
 
-<label for="inputName">Game Content address: </label>
-<input type="text" id="inputAddress" name="address" placeholder="game content address" value="$esc.html($gamecontent.address)">
-<label for="inputName">Game Content port: </label>
-<input type="text" id="inputPort" name="port" placeholder="game content port" value="$esc.html($gamecontent.port)">
-
 <a href="$link.setRelative("buildings")">Buildings</a><br>
 <a href="$link.setRelative("resources")">Resources</a>
 
