@@ -1,4 +1,4 @@
-package com.distributed.springtest.utils;
+package com.distributed.springtest.utils.wrappers;
 
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Construction;

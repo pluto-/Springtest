@@ -1,4 +1,5 @@
-import com.distributed.springtest.utils.PlayerStateWrapper;
+import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
+import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
@@ -14,7 +15,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Jonas on 2014-12-05.
@@ -86,12 +86,12 @@ public class PlayerResourcesController {
     }
 
     @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
-    public Object buyBuilding(@RequestBody BuyBuildingWrapper buyBuildingWrapper) {
+    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) {
         List<BuildingCost> costs = null;
         List<Resource> playerResources = null;
         try {
-            costs = getBuildingCost(buildingId);
-            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
+            costs = getBuildingCost(wrapper.getBuildingId());
+            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -111,8 +111,8 @@ public class PlayerResourcesController {
                     }
                 }
 
-                construction.setPlayerId(playerId);
-                construction.setBuildingId(buildingId);
+                construction.setPlayerId(wrapper.getPlayerId());
+                construction.setBuildingId(wrapper.getBuildingId());
                 construction.setStartedAt(new Timestamp(System.currentTimeMillis()));
                 construction.save();
             } catch(SQLException e) {

@@ -6,6 +6,7 @@ import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,46 +34,54 @@ public class ResourcesController {
     public Object resources() throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("resources");
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/getResources";
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource";
         ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
         modelAndView.addObject("resources", Arrays.asList(resourceInfos));
         return modelAndView;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public Object getResource(@PathVariable Integer id) throws SQLException {
+    public Object getResource(@PathVariable Integer id) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("editResource");
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/getResource";
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/" + id;
+        ResourceInfo resourceInfo = restTemplate.getForObject(uri, ResourceInfo.class);
 
-        modelAndView.addObject("resource", resource);
+        modelAndView.addObject("resource", resourceInfo);
         return modelAndView;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException {
-        ResourceInfo resource = ResourceInfo.findById(ResourceInfo.class, id);
+    public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
+
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/" + id;
+        ResourceInfo resource = restTemplate.getForObject(uri, ResourceInfo.class);
+
         resource.setName(form.getName());
         resource.save();
         resource.transaction().commit();
         return new RedirectView("/resources/");
     }
 
-    @RequestMapping(value = "/new", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newResource() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("editResource");
         modelAndView.addObject("edit", false);
         return modelAndView;
-    }
+    }*/
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public Object newResourcex(@ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException {
+    public Object newResource(@ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
+
         ResourceInfo resource = new ResourceInfo();
         resource.setName(form.getName());
-        resource.save();
-        resource.transaction().commit();
+
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/add";
+        ResponseEntity<Integer> resourceId = restTemplate.postForEntity(uri, resource, Integer.class);
+
         return new RedirectView("/resources");
     }
 }
