@@ -1,4 +1,4 @@
-package com.distributed.springtest.gamecontent;
+package com.distributed.springtest.utils.wrappers;
 
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
