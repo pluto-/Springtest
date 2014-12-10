@@ -1,5 +1,11 @@
 package com.distributed.springtest.client;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletContext;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,14 +15,17 @@ import java.util.Properties;
 /**
  * Created by Jonas on 2014-12-08.
  */
-public class PropertiesLoader {
+@Service
+public class PropertiesLoader{
 
-    public static String getGameContentAddressAndPort() throws IOException {
+
+    public String getGameContentAddressAndPort(ServletContext servletContext) throws IOException {
         String result = "";
         Properties prop = new Properties();
-        String propFileName = "client/src/main/resources/admin.properties";
+        String propFileName = "admin.properties";
 
-        InputStream inputStream = new FileInputStream(propFileName);
+        System.out.println(servletContext.getRealPath(""));
+        InputStream inputStream = servletContext.getResourceAsStream("WEB-INF/classes/admin.properties");
 
         if (inputStream != null) {
             prop.load(inputStream);

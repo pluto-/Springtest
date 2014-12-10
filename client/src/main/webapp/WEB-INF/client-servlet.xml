@@ -10,7 +10,9 @@
 
        <context:component-scan base-package="com.distributed.springtest.client" />
 
-       <mvc:annotation-driven />
+       <mvc:annotation-driven validator="validator"/>
+       <mvc:resources mapping="/**" location="META-INF/resources" />
+       <mvc:default-servlet-handler />
        <mvc:interceptors>
               <mvc:interceptor>
                      <mvc:mapping path="/**" />
@@ -19,6 +21,8 @@
                      <bean class="com.distributed.springtest.client.Interceptor"/>
               </mvc:interceptor>
        </mvc:interceptors>
+       <context:property-placeholder location="classpath:admin.properties" />
+
 
        <bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
               <property name="toolboxConfigLocation" value="/WEB-INF/velocity-toolbox.xml" />
@@ -29,5 +33,7 @@
        <bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
               <property name="resourceLoaderPath" value="WEB-INF/vsl/" />
        </bean>
+
+       <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 
 </beans>
