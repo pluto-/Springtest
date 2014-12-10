@@ -20,26 +20,26 @@ import java.util.List;
 @RestController
 public class GameContentController {
 
-    @RequestMapping("/building")
+    @RequestMapping("/buildings")
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
         List<BuildingInfo> buildingInfos = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
 
         return new ResponseEntity<List<BuildingInfo>>(buildingInfos, HttpStatus.OK);
     }
 
-    @RequestMapping("/building/{id}")
+    @RequestMapping("/buildings/{id}")
     public ResponseEntity<BuildingInfo> getBuilding(@PathVariable Integer id) throws SQLException {
         BuildingInfo buildingInfo = BuildingInfo.findById(BuildingInfo.class, id);
         return new ResponseEntity<BuildingInfo>(buildingInfo, HttpStatus.OK);
     }
 
-    @RequestMapping("/building/{id}/cost")
+    @RequestMapping("/buildings/{id}/costs")
     public ResponseEntity<List<BuildingCost>> getBuildingCost(@PathVariable Integer id) throws SQLException {
         List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1#", id);
         return new ResponseEntity<List<BuildingCost>>(buildingCosts, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/building/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/buildings/add", method = RequestMethod.POST)
     public Integer addBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
         BuildingInfo buildingInfo = new BuildingInfo();
@@ -59,7 +59,7 @@ public class GameContentController {
         return buildingInfo.getId();
     }
 
-    @RequestMapping(value = "/building/modify", method = RequestMethod.PUT)
+    @RequestMapping(value = "/buildings/modify", method = RequestMethod.PUT)
     public Integer modifyBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
         BuildingInfo buildingInfo = Building.findById(BuildingInfo.class, incomingBuildingInfo.getId());
@@ -89,7 +89,7 @@ public class GameContentController {
         return buildingInfo.getId();
     }
 
-    @RequestMapping(value = "/resource/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/resources/add", method = RequestMethod.POST)
     public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setName(incomingResourceInfo.getName());
@@ -98,13 +98,13 @@ public class GameContentController {
         return resourceInfo.getId();
     }
 
-    @RequestMapping("/resource")
+    @RequestMapping("/resources")
     public ResponseEntity<List<ResourceInfo>> getResources() throws SQLException {
         List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
         return new ResponseEntity<List<ResourceInfo>>(resources, HttpStatus.OK);
     }
 
-    @RequestMapping("/resource/{id}")
+    @RequestMapping("/resources/{id}")
     public ResponseEntity<ResourceInfo> getResource(@PathVariable Integer id) throws SQLException {
         ResourceInfo resource = ResourceInfo.select(ResourceInfo.class, "SELECT * FROM resources WHERE id = #1#", id);
         return new ResponseEntity<ResourceInfo>(resource, HttpStatus.OK);
