@@ -1,3 +1,5 @@
+package com.distributed.springtest.loginservice;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -7,10 +9,10 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @ComponentScan
 @EnableAutoConfiguration
-public class PlayerResources {
+public class LoginService {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(PlayerResources.class, args);
+        SpringApplication.run(LoginService.class, args);
     }
 }

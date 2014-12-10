@@ -1,3 +1,5 @@
+package com.distributed.springtest.playerresources;
+
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
@@ -91,7 +93,7 @@ public class PlayerResourcesController {
         List<Resource> playerResources = null;
         try {
             costs = getBuildingCost(wrapper.getBuildingId());
-            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
+            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE id = #1#", wrapper.getPlayerId());
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -155,7 +157,7 @@ public class PlayerResourcesController {
         return true;
     }
 
-    private void updatePlayerResources(int playerId) throws SQLException, IOException {
+    protected static void updatePlayerResources(int playerId) throws SQLException, IOException {
         List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
         List<Building> buildings = Building.selectAll(Building.class, "SELECT * FROM buildings WHERE player_id = #1#", playerId);
         List<BuildingInfo> buildingsInfo = getBuildingsInfo();
@@ -220,14 +222,14 @@ public class PlayerResourcesController {
         new Resource().transaction().commit();
     }
 
-    private List<BuildingInfo> getBuildingsInfo() throws IOException {
+    private static List<BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
         BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
         return Arrays.asList(buildingInfos);
     }
 
-    private List<BuildingCost> getBuildingCost(int buildingId) throws IOException {
+    private static List<BuildingCost> getBuildingCost(int buildingId) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/getBuildingCost/" + buildingId;
         BuildingCost[] buildingCosts = restTemplate.getForObject(uri, BuildingCost[].class);
