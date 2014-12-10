@@ -64,8 +64,8 @@ public class PlayerResourcesController {
         return constructions;
     }*/
 
-    @RequestMapping("/player_state")
-    public Object getPlayerResourcesBuildingsConstructions(@RequestParam(value="player_id") int playerId) {
+    @RequestMapping("/state/{id}")
+    public Object getPlayerResourcesBuildingsConstructions(@PathVariable("id") Integer playerId) {
 
         try {
 
@@ -85,8 +85,8 @@ public class PlayerResourcesController {
         }
     }
 
-    @RequestMapping(value="/player_buy_building",  method= RequestMethod.POST)
-    public Object buyBuilding(@RequestParam(value="player_id") int playerId, @RequestParam(value="building_id") int buildingId) {
+    @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
+    public Object buyBuilding(@RequestBody BuyBuildingWrapper buyBuildingWrapper) {
         List<BuildingCost> costs = null;
         List<Resource> playerResources = null;
         try {

@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,17 +30,23 @@ import java.util.List;
 public class ResourcesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public Object resources() throws SQLException {
+    public Object resources() throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("resources");
-        List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
-        modelAndView.addObject("resources", resources);
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/getResources";
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
+        modelAndView.addObject("resources", Arrays.asList(resourceInfos));
         return modelAndView;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getResource(@PathVariable Integer id) throws SQLException {
         ModelAndView modelAndView = new ModelAndView("editResource");
-        ResourceInfo resource = ResourceInfo.findById(ResourceInfo.class, id);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/getResource";
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
+
         modelAndView.addObject("resource", resource);
         return modelAndView;
     }
