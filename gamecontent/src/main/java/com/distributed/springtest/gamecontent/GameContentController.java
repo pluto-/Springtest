@@ -4,8 +4,7 @@ import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
-import com.jajja.jorm.Database;
-import com.jajja.jorm.Transaction;
+import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,26 +20,26 @@ import java.util.List;
 @RestController
 public class GameContentController {
 
-    @RequestMapping("/getBuildings")
+    @RequestMapping("/building")
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
         List<BuildingInfo> buildingInfos = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
 
         return new ResponseEntity<List<BuildingInfo>>(buildingInfos, HttpStatus.OK);
     }
 
-    @RequestMapping("/getBuilding/{id}")
+    @RequestMapping("/building/{id}")
     public ResponseEntity<BuildingInfo> getBuilding(@PathVariable Integer id) throws SQLException {
         BuildingInfo buildingInfo = BuildingInfo.findById(BuildingInfo.class, id);
         return new ResponseEntity<BuildingInfo>(buildingInfo, HttpStatus.OK);
     }
 
-    @RequestMapping("/getBuildingCost/{id}")
+    @RequestMapping("/building/{id}/cost")
     public ResponseEntity<List<BuildingCost>> getBuildingCost(@PathVariable Integer id) throws SQLException {
         List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1#", id);
         return new ResponseEntity<List<BuildingCost>>(buildingCosts, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/addBuilding", method = RequestMethod.POST)
+    @RequestMapping(value = "/building/add", method = RequestMethod.POST)
     public Integer addBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
         BuildingInfo buildingInfo = new BuildingInfo();
@@ -60,7 +59,7 @@ public class GameContentController {
         return buildingInfo.getId();
     }
 
-    @RequestMapping(value = "/modifyBuilding", method = RequestMethod.PUT)
+    @RequestMapping(value = "/building/modify", method = RequestMethod.PUT)
     public Integer modifyBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
         BuildingInfo buildingInfo = Building.findById(BuildingInfo.class, incomingBuildingInfo.getId());
@@ -90,7 +89,7 @@ public class GameContentController {
         return buildingInfo.getId();
     }
 
-    @RequestMapping(value = "/addResource", method = RequestMethod.POST)
+    @RequestMapping(value = "/resource/add", method = RequestMethod.POST)
     public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setName(incomingResourceInfo.getName());
@@ -99,13 +98,19 @@ public class GameContentController {
         return resourceInfo.getId();
     }
 
-    @RequestMapping("/getResources")
+    @RequestMapping("/resource")
     public ResponseEntity<List<ResourceInfo>> getResources() throws SQLException {
         List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
         return new ResponseEntity<List<ResourceInfo>>(resources, HttpStatus.OK);
     }
 
-    @RequestMapping("/getBuildingsAndCosts")
+    @RequestMapping("/resource/{id}")
+    public ResponseEntity<ResourceInfo> getResource(@PathVariable Integer id) throws SQLException {
+        ResourceInfo resource = ResourceInfo.select(ResourceInfo.class, "SELECT * FROM resources WHERE id = #1#", id);
+        return new ResponseEntity<ResourceInfo>(resource, HttpStatus.OK);
+    }
+
+    @RequestMapping("/buildingsAndCosts")
     public ResponseEntity<List<BuildingInfoWrapper>> getBuildingsAndCosts() throws SQLException {
         List<BuildingInfoWrapper> resultList = new LinkedList<BuildingInfoWrapper>();
         List<BuildingInfo> buildingInfoList = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
