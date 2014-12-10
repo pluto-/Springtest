@@ -6,6 +6,7 @@ import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -14,9 +15,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,11 +34,14 @@ import java.util.List;
 @RequestMapping("/resources")
 public class ResourcesController {
 
+    @Value("${gamecontent.host}")
+    private String gamecontentURL;
+
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public Object resources() throws SQLException, IOException {
+    public Object resources(HttpServletRequest request) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("resources");
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource";
+        String uri = gamecontentURL + "/resource";
         ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
         modelAndView.addObject("resources", Arrays.asList(resourceInfos));
         return modelAndView;
@@ -45,7 +52,7 @@ public class ResourcesController {
         ModelAndView modelAndView = new ModelAndView("editResource");
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/" + id;
+        String uri = gamecontentURL + "/resource/" + id;
         ResourceInfo resourceInfo = restTemplate.getForObject(uri, ResourceInfo.class);
 
         modelAndView.addObject("resource", resourceInfo);
@@ -56,7 +63,7 @@ public class ResourcesController {
     public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/" + id;
+        String uri = gamecontentURL + "/resource/" + id;
         ResourceInfo resource = restTemplate.getForObject(uri, ResourceInfo.class);
 
         resource.setName(form.getName());
@@ -79,9 +86,10 @@ public class ResourcesController {
         resource.setName(form.getName());
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getGameContentAddressAndPort() + "/resource/add";
+        String uri = gamecontentURL + "/resource/add";
         ResponseEntity<Integer> resourceId = restTemplate.postForEntity(uri, resource, Integer.class);
 
         return new RedirectView("/resources");
     }
+
 }

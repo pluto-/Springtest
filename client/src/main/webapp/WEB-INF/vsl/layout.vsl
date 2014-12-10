@@ -3,13 +3,13 @@
     <title>Resources</title>
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap.css")" type="text/css">
+    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.css")" type="text/css">
+    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.min.css")" type="text/css">
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="$link.setRelative("/js/bootstrap.min.js")" type="text/javascript"></script>
 </head>
 
 <body>

@@ -1,14 +1,5 @@
-<html>
-<head>
-    <title>Hello</title>
-</head>
-<body>
 <h1>Admin</h1>
 <br/>
 
 <a href="$link.setRelative("buildings")">Buildings</a><br>
 <a href="$link.setRelative("resources")">Resources</a>
-
-</body>
-
-</html>
