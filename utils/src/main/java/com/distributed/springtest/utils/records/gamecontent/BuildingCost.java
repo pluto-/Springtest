@@ -5,7 +5,7 @@ import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
 @JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
-@Jorm(database= "gamecontent", schema="public", table="building_costs", primaryKey="building_id")
+@Jorm(database="gamecontent", schema="public", table="building_costs", primaryKey="id")
 public class BuildingCost extends Record {
     public Integer getBuildingId() {
         return get("building_id", Integer.class);
@@ -31,15 +31,11 @@ public class BuildingCost extends Record {
         set("amount", amount);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if((o == null) || !(o instanceof BuildingCost)){
-            return false;
-        } else {
-            return ((BuildingCost) o).getBuildingId().equals(this.getBuildingId()) &&
-                    ((BuildingCost) o).getAmount().equals(this.getAmount()) &&
-                    ((BuildingCost) o).getResourceId().equals(this.getResourceId());
-        }
+    public Integer getId() {
+        return get("id", Integer.class);
     }
 
+    public void setId(Integer id) {
+        set("id", id);
+    }
 }

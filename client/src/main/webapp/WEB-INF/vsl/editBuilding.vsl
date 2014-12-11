@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" xmlns="http://java.sun.com/jsf/html">
     <div class="row">
         <div class="col-md-12">
             <legend>Buildings</legend>
@@ -31,34 +31,38 @@
                 </div>
                 <button type="submit" class="btn-default">Save</button>
             </form>
-            <form method="post" action="$link.setRelative("/buildings/$form.id/addCost")">
-                <table class="table">
-                    <h1>Resource costs</h1>
-                    <thead>
-                        <tr>
-                            <th>Resource name</th>
-                            <th>Amount</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        #foreach($buildingCost in $form.buildingCosts)
+            <table class="table">
+                <h1>Resource costs</h1>
+                <thead>
+                    <tr>
+                        <th>Resource name</th>
+                        <th>Amount</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    #foreach($buildingCost in $form.buildingCosts)
+                    <form method="post" action="$link.setRelative("buildings/$form.id/modifyCost/$buildingCost.id")">
                         <tr>
                             <td>
-                                <select type="text" class="form-control" id="inputCostResourceId$buildingCost.resourceId" name="resourceId$buildingCost.resourceId">
+                                <select type="text" class="form-control" id="inputCostResourceId$velocityCount" name="resourceId">
                                     #foreach($resourceId in $resources.keySet())
                                         <option value=$resourceId #if($buildingCost.resource_id.equals($resourceId)) selected #end>
                                             $resourceId: $resources.get($resourceId)</option>
                                     #end
                                 </select>
                             </td>
-                            <td><input type="text" id="amount$velocityCount" name="amount   $buildingCost.resourceId" value="$buildingCost.amount"></td>
-                            <td><a href="$link.setRelative("buildings/$form.id/removeCost/$buildingCost.resourceId")">delete</a></td>
+                            #set($amountName="amount"+$velocityCount)
+                            <td><input type="text" id="amount$velocityCount" name="amount" value="$buildingCost.amount"></td>
+                            <td><button class="btn-default" type="submit"">save</button></td>
+                            <td><a href="$link.setRelative("buildings/$form.id/removeCost/$buildingCost.id")">delete</a></td>
                         </tr>
-                        #end
-                    </tbody>
-                </table>
+                    </form>
+                    #end
+                </tbody>
+            </table>
+            <form method="post" action="$link.setRelative("/buildings/$form.id/addCost")">
                 <label for="inputNewCostResourceId">Resource: </label>
                 <select type="text" class="form-control" id="inputNewCostResourceId" name="newCostResourceId">
                 #foreach($resourceId in $resources.keySet())

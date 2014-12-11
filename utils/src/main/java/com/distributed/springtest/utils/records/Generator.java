@@ -10,7 +10,7 @@ public class Generator {
     public static void main( String[] args ) throws SQLException {
         try {
             com.jajja.jorm.generator.Generator generator = new com.jajja.jorm.generator.Generator();
-            generator.addDatabase("login", "com.distributed.springtest.login.login").addSchema("public").addTable("players");
+            generator.addDatabase("gamecontent", "com.distributed.springtest.utils.records.gamecontent").addSchema("public").addTable("building_costs");
             generator.fetchMetadata();
             System.out.println(generator);
         } catch (SQLException e) {

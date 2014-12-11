@@ -29,14 +29,14 @@ public class BuildingForm {
     @NotNull
     private Float generatedAmount;
 
-    private List<BuildingCost> buildingCosts = ListUtils.lazyList(new ArrayList<BuildingCost>(), FactoryUtils.instantiateFactory(BuildingCost.class));
+    private List<BuildingCost> buildingCosts = new ArrayList<>();
 
     public List<BuildingCost> getBuildingCosts() {
         return buildingCosts;
     }
 
     public void setBuildingCosts(List<BuildingCost> buildingCosts) {
-        this.buildingCosts = ListUtils.lazyList(buildingCosts, FactoryUtils.instantiateFactory(BuildingCost.class));
+        this.buildingCosts = buildingCosts;
     }
 
     public Integer getId() {
