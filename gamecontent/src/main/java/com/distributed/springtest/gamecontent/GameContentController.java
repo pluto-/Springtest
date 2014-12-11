@@ -39,6 +39,32 @@ public class GameContentController {
         return new ResponseEntity<List<BuildingCost>>(buildingCosts, HttpStatus.OK);
     }
 
+    @RequestMapping("/buildings/{id}/costs/add")
+    public ResponseEntity<String> addBuildingCost(@PathVariable Integer id, @RequestBody BuildingCost cost) throws SQLException {
+        BuildingCost buildingCost = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", cost.getBuildingId(), cost.getResourceId());
+        if(buildingCost == null) {
+            cost.setBuildingId(id);
+            cost.save();
+            cost.transaction().commit();
+        } else {
+            buildingCost.setAmount(cost.getAmount());
+            buildingCost.save();
+            buildingCost.transaction().commit();
+        }
+        return new ResponseEntity<String>("OK", HttpStatus.OK);
+    }
+
+    @RequestMapping("/buildings/{id}/costs/delete")
+    public ResponseEntity<String> deleteBuildingCost(@PathVariable Integer id, @RequestBody BuildingCost cost) throws SQLException {
+        BuildingCost buildingCost  = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", cost.getBuildingId(), cost.getResourceId());
+        if(buildingCost != null) {
+            buildingCost.delete();
+            return new ResponseEntity<String>("OK", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("No such object", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @RequestMapping(value = "/buildings/add", method = RequestMethod.POST)
     public Integer addBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
         BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();

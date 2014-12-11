@@ -6,30 +6,68 @@
                 #if($edit == true)
                 <div class="form-group">
                     <label for="inputId">Building ID: </label>
-                    <input type="text" id="inputId" name="id" placeholder="Building ID" value="$esc.html($building.id)" disabled>
+                    <input type="text" id="inputId" name="id" placeholder="Building ID" value="$esc.html($form.id)" disabled>
                 </div>
                 #end
                 <div class="form-group">
                     <label for="inputName">Building Name: </label>
-                    <input type="text" id="inputName" name="name" placeholder="Building name" #if($edit == true) value="$esc.html($building.name)" #end>
+                    <input type="text" id="inputName" name="name" placeholder="Building name" #if($edit == true) value="$esc.html($form.name)" #end>
                 </div>
                 <div class="form-group">
                     <label for="inputBuildtime">Buildtime: </label>
-                    <input type="text" id="inputBuildtime" name="buildtime" placeholder="Buildtime" #if($edit == true) value="$esc.html($building.buildtime)" #end>
+                    <input type="text" id="inputBuildtime" name="buildtime" placeholder="Buildtime" #if($edit == true) value="$esc.html($form.buildtime)" #end>
                 </div>
                 <div class="form-group">
                     <label for="inputGeneratedResource">Generated Resource</label>
                     <select type="text" class="form-control" id="inputGeneratedResource" name="generatedId">
-                        #foreach($resource in $resources)
-                            <option value=$resource.id #if($building.generated_id.equals($resource.id))selected#end>$resource.id: $resource.name</option>
+                        #foreach($resourceId in $resources.keySet())
+                            <option value=$resourceId #if($form.generatedId.equals($resourceId))selected#end>$resourceId: $resources.get($resourceId)</option>
                         #end
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="inputGeneratedAmount">Generated Amount: </label>
-                    <input type="text" id="inputGeneratedAmount" name="generatedAmount" placeholder="Generated Amount" #if($edit == true) value="$esc.html($building.generated_amount)" #end>
+                    <input type="text" id="inputGeneratedAmount" name="generatedAmount" placeholder="Generated Amount" #if($edit == true) value="$esc.html($form.generatedAmount)" #end>
                 </div>
-                <button type="submit" class="button">Save</button>
+                <button type="submit" class="btn-default">Save</button>
+            </form>
+            <form method="post" action="$link.setRelative("/buildings/$form.id/addCost")">
+                <table class="table">
+                    <h1>Resource costs</h1>
+                    <thead>
+                        <tr>
+                            <th>Resource name</th>
+                            <th>Amount</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        #foreach($buildingCost in $form.buildingCosts)
+                        <tr>
+                            <td>
+                                <select type="text" class="form-control" id="inputCostResourceId$buildingCost.resourceId" name="resourceId$buildingCost.resourceId">
+                                    #foreach($resourceId in $resources.keySet())
+                                        <option value=$resourceId #if($buildingCost.resource_id.equals($resourceId)) selected #end>
+                                            $resourceId: $resources.get($resourceId)</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td><input type="text" id="amount$velocityCount" name="amount   $buildingCost.resourceId" value="$buildingCost.amount"></td>
+                            <td><a href="$link.setRelative("buildings/$form.id/removeCost/$buildingCost.resourceId")">delete</a></td>
+                        </tr>
+                        #end
+                    </tbody>
+                </table>
+                <label for="inputNewCostResourceId">Resource: </label>
+                <select type="text" class="form-control" id="inputNewCostResourceId" name="newCostResourceId">
+                #foreach($resourceId in $resources.keySet())
+                    <option value=$resourceId>$resourceId: $resources.get($resourceId)</option>
+                #end
+                </select>
+                <label for="InputNewCostAmount">Amount: </label>
+                <input type="text" id="InputNewCostAmount" name="newCostAmount" placeholder="Amount">
+                <button type="submit" class="btn-default">Add new building cost</button>
             </form>
         </div>
     </div>

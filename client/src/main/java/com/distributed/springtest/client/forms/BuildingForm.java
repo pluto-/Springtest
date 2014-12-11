@@ -1,6 +1,14 @@
 package com.distributed.springtest.client.forms;
 
+import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
+import org.apache.commons.collections.FactoryUtils;
+import org.apache.commons.collections.ListUtils;
+import org.springframework.util.AutoPopulatingList;
+
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Patrik on 2014-12-09.
@@ -20,6 +28,16 @@ public class BuildingForm {
 
     @NotNull
     private Float generatedAmount;
+
+    private List<BuildingCost> buildingCosts = ListUtils.lazyList(new ArrayList<BuildingCost>(), FactoryUtils.instantiateFactory(BuildingCost.class));
+
+    public List<BuildingCost> getBuildingCosts() {
+        return buildingCosts;
+    }
+
+    public void setBuildingCosts(List<BuildingCost> buildingCosts) {
+        this.buildingCosts = ListUtils.lazyList(buildingCosts, FactoryUtils.instantiateFactory(BuildingCost.class));
+    }
 
     public Integer getId() {
         return id;
