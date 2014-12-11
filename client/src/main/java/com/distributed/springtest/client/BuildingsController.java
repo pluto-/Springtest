@@ -93,6 +93,19 @@ public class BuildingsController {
         return new RedirectView("/buildings/" + id, true);
     }
 
+    @RequestMapping(value = "/{id}/removeCost/{resourceId}")
+    public Object removeCost(@PathVariable Integer id, @PathVariable Integer resourceId) {
+        BuildingCost cost = new BuildingCost();
+        cost.setBuildingId(id);
+        cost.setResourceId(id);
+        cost.setAmount(1);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/" + id + "/costs/delete", cost, String.class);
+        System.out.println(responseEntity.getStatusCode() + ": " + responseEntity.getBody());
+        return new RedirectView("/buildings/" + id, true);
+    }
+
+
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newBuilding() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("editBuilding");

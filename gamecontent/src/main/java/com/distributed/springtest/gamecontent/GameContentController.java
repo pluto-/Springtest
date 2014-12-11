@@ -59,6 +59,7 @@ public class GameContentController {
         BuildingCost buildingCost  = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", cost.getBuildingId(), cost.getResourceId());
         if(buildingCost != null) {
             buildingCost.delete();
+            buildingCost.transaction().commit();
             return new ResponseEntity<String>("OK", HttpStatus.OK);
         } else {
             return new ResponseEntity<String>("No such object", HttpStatus.BAD_REQUEST);
