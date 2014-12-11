@@ -28,7 +28,7 @@ public class PlayerStateController {
         ModelAndView modelAndView = new ModelAndView("player/state");
 
         RestTemplate restTemplate = new RestTemplate();
-        PlayerStateWrapper wrapper = restTemplate.getForObject(playerResourcesURL + "/state/" + playerId, PlayerStateWrapper.class);
+        //jonas PlayerStateWrapper wrapper = restTemplate.getForObject(playerResourcesURL + "/state/" + playerId, PlayerStateWrapper.class);
         /*RestTemplate restTemplate = new RestTemplate();
         BuildingInfo[] buildings = restTemplate.getForObject(gamecontentURL + "/buildings", BuildingInfo[].class);
         ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
