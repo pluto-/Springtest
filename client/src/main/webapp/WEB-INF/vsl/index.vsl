@@ -3,3 +3,8 @@
 
 <a href="$link.setRelative("buildings")">Buildings</a><br>
 <a href="$link.setRelative("resources")">Resources</a>
+
+<h1>Player</h1>
+<br/>
+
+<a href="$link.setRelative("player/state")">State</a><br>
