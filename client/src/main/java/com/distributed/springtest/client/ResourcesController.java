@@ -34,14 +34,14 @@ import java.util.List;
 @RequestMapping("/resources")
 public class ResourcesController {
 
-    @Value("${gamecontent.host}")
+    @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Object resources(HttpServletRequest request) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("resources");
         RestTemplate restTemplate = new RestTemplate();
-        String uri = gamecontentURL + "/resource";
+        String uri = gamecontentURL + "/resources";
         ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
         modelAndView.addObject("resources", Arrays.asList(resourceInfos));
         return modelAndView;
@@ -52,7 +52,7 @@ public class ResourcesController {
         ModelAndView modelAndView = new ModelAndView("editResource");
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = gamecontentURL + "/resource/" + id;
+        String uri = gamecontentURL + "/resources/" + id;
         ResourceInfo resourceInfo = restTemplate.getForObject(uri, ResourceInfo.class);
 
         modelAndView.addObject("resource", resourceInfo);
@@ -63,7 +63,7 @@ public class ResourcesController {
     public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = gamecontentURL + "/resource/" + id;
+        String uri = gamecontentURL + "/resources/" + id;
         ResourceInfo resource = restTemplate.getForObject(uri, ResourceInfo.class);
 
         resource.setName(form.getName());
@@ -86,7 +86,7 @@ public class ResourcesController {
         resource.setName(form.getName());
 
         RestTemplate restTemplate = new RestTemplate();
-        String uri = gamecontentURL + "/resource/add";
+        String uri = gamecontentURL + "/resources/add";
         ResponseEntity<Integer> resourceId = restTemplate.postForEntity(uri, resource, Integer.class);
 
         return new RedirectView("/resources");
