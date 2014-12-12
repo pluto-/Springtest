@@ -75,8 +75,8 @@ public class BuildingsController {
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
-        building.save();
-        building.transaction().commit();
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.put(gamecontentURL + "/buildings/modify", building);
         return new RedirectView("/buildings");
     }
 

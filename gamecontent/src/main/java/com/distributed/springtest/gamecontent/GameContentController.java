@@ -88,33 +88,15 @@ public class GameContentController {
     }
 
     @RequestMapping(value = "/buildings/modify", method = RequestMethod.PUT)
-    public Integer modifyBuilding(@RequestBody BuildingInfoWrapper buildingInfoWrapper) throws SQLException {
-        BuildingInfo incomingBuildingInfo = buildingInfoWrapper.getBuildingInfo();
+    public void modifyBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
         BuildingInfo buildingInfo = Building.findById(BuildingInfo.class, incomingBuildingInfo.getId());
-        buildingInfo.setName(incomingBuildingInfo.getName());
-        buildingInfo.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
-        buildingInfo.setGeneratedId(incomingBuildingInfo.getGeneratedId());
-        buildingInfo.save();
-        List<BuildingCost> buildingCosts = buildingInfoWrapper.getBuildingCosts();
-        List<BuildingCost> currentBuildingCosts = BuildingCost.selectAll(BuildingCost.class,
-                "SELECT * FROM building_costs WHERE building_id = #1#", buildingInfo.getId());
-        List<BuildingCost> buildingCostsForRemoval = new ArrayList<BuildingCost>(currentBuildingCosts);
-        buildingCostsForRemoval.removeAll(buildingCosts);
-        for(BuildingCost buildingCost : buildingCostsForRemoval) {
-            buildingCost.delete();
+        if(buildingInfo != null) {
+            buildingInfo.setName(incomingBuildingInfo.getName());
+            buildingInfo.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
+            buildingInfo.setGeneratedId(incomingBuildingInfo.getGeneratedId());
+            buildingInfo.save();
+            buildingInfo.transaction().commit();
         }
-        for(BuildingCost incomingBuildingCost : buildingCosts) {
-            BuildingCost buildingCost = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", buildingInfoWrapper.getBuildingInfo().getId(), incomingBuildingCost.getResourceId());
-            if(buildingCost == null) {
-                buildingCost = new BuildingCost();
-            }
-            buildingCost.setResourceId(incomingBuildingCost.getResourceId());
-            buildingCost.setBuildingId(buildingInfoWrapper.getBuildingInfo().getId());
-            buildingCost.setAmount(incomingBuildingCost.getAmount());
-            buildingCost.save();
-        }
-        buildingInfo.transaction().commit();
-        return buildingInfo.getId();
     }
 
     @RequestMapping(value = "/resources/add", method = RequestMethod.POST)

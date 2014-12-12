@@ -11,7 +11,7 @@
        <context:component-scan base-package="com.distributed.springtest.client" />
 
        <mvc:annotation-driven validator="validator"/>
-       <mvc:resources mapping="/**" location="META-INF/resources" />
+       <mvc:resources mapping="/**" location="META-INF/resources/" />
        <mvc:default-servlet-handler />
        <mvc:interceptors>
               <mvc:interceptor>

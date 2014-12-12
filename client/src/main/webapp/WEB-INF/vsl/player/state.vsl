@@ -1,6 +1,2 @@
-<div class="row">
-    <div class="col-md-12">
-        <legend>Player State</legend>
-        <button class="button" onclick="location.href = '$link.getURI()/new'">New</button>
-    </div>
-</div>
+<legend>Player State</legend>
+<button class="button" onclick="location.href = '$link.getURI()/new'">New</button>
