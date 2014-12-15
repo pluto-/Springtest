@@ -14,7 +14,7 @@
 
 <body>
 
-#if($error)
+#if($messages)
 <div class="container" xmlns="http://java.sun.com/jsf/html">
     #foreach($message in $messages)
     <div class="row">
@@ -24,8 +24,7 @@
     </div>
     #end
 </div>
-
-#end()
+#end
 <div class="container" xmlns="http://java.sun.com/jsf/html">
     <div class="row">
         <div class="col-md-12">
