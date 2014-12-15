@@ -1,6 +1,6 @@
 package com.distributed.springtest.client.forms.player;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import org.apache.commons.collections.FactoryUtils;
 import org.apache.commons.collections.ListUtils;
 
@@ -33,14 +33,14 @@ public class BuildingForm {
         this.amount = amount;
     }
 
-    private List<BuildingCost> buildingCosts = ListUtils.lazyList(new ArrayList<BuildingCost>(), FactoryUtils.instantiateFactory(BuildingCost.class));
+    private List<BuildingCostInfo> buildingCosts = ListUtils.lazyList(new ArrayList<BuildingCostInfo>(), FactoryUtils.instantiateFactory(BuildingCostInfo.class));
 
-    public List<BuildingCost> getBuildingCosts() {
+    public List<BuildingCostInfo> getBuildingCosts() {
         return buildingCosts;
     }
 
-    public void setBuildingCosts(List<BuildingCost> buildingCosts) {
-        this.buildingCosts = ListUtils.lazyList(buildingCosts, FactoryUtils.instantiateFactory(BuildingCost.class));
+    public void setBuildingCosts(List<BuildingCostInfo> buildingCosts) {
+        this.buildingCosts = ListUtils.lazyList(buildingCosts, FactoryUtils.instantiateFactory(BuildingCostInfo.class));
     }
 
     public String getName() {

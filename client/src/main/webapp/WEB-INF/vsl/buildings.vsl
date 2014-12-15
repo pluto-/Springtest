@@ -17,8 +17,8 @@
             <td>$building.id</td>
             <td>$building.name</td>
             <td>$building.buildtime</td>
-            <td>$resources.get($building.generated_id)</td>
-            <td>$building.generated_amount</td>
+            <td>$building.generatedName</td>
+            <td>$building.generatedAmount</td>
             <td><a href="$link.setRelative("buildings/$building.id")">edit</a></td>
         </tr>
         #end

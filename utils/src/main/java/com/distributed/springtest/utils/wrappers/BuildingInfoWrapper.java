@@ -1,7 +1,7 @@
 package com.distributed.springtest.utils.wrappers;
 
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +12,14 @@ import java.util.List;
 public class BuildingInfoWrapper {
 
     private BuildingInfo buildingInfo;
-    private List<BuildingCost> buildingCosts;
+    private List<BuildingCostInfo> buildingCosts;
 
     public BuildingInfoWrapper() {
         buildingInfo = new BuildingInfo();
-        buildingCosts = new ArrayList<BuildingCost>();
+        buildingCosts = new ArrayList<BuildingCostInfo>();
     }
 
-    public BuildingInfoWrapper(BuildingInfo buildingInfo, List<BuildingCost> buildingCosts) {
+    public BuildingInfoWrapper(BuildingInfo buildingInfo, List<BuildingCostInfo> buildingCosts) {
         this.buildingInfo = buildingInfo;
         this.buildingCosts = buildingCosts;
     }
@@ -32,15 +32,15 @@ public class BuildingInfoWrapper {
         this.buildingInfo = buildingInfo;
     }
 
-    public List<BuildingCost> getBuildingCosts() {
+    public List<BuildingCostInfo> getBuildingCosts() {
         return buildingCosts;
     }
 
-    public void setBuildingCosts(List<BuildingCost> buildingCosts) {
+    public void setBuildingCosts(List<BuildingCostInfo> buildingCosts) {
         this.buildingCosts = buildingCosts;
     }
 
-    public void addCost(BuildingCost buildingCostInfo) {
+    public void addCost(BuildingCostInfo buildingCostInfo) {
         buildingCosts.add(buildingCostInfo);
     }
 

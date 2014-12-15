@@ -1,35 +1,35 @@
 <html>
-<head>
-    <title>Resources</title>
+    <head>
+        <title>Resources</title>
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap.css")" type="text/css">
-    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.css")" type="text/css">
-    <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.min.css")" type="text/css">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="$link.setRelative("/css/bootstrap.css")" type="text/css">
+        <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.css")" type="text/css">
+        <link rel="stylesheet" href="$link.setRelative("/css/bootstrap-theme.min.css")" type="text/css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="$link.setRelative("/js/jquery-2.1.1.min.js")" type="text/javascript"></script>
-    <script src="$link.setRelative("/js/bootstrap.min.js")" type="text/javascript"></script>
-</head>
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="$link.setRelative("/js/jquery-2.1.1.min.js")" type="text/javascript"></script>
+        <script src="$link.setRelative("/js/bootstrap.min.js")" type="text/javascript"></script>
+    </head>
 
-<body>
-#if($messages)
-<div class="container" xmlns="http://java.sun.com/jsf/html">
-    #foreach($message in $messages)
-    <div class="row">
-        <div class="col-md-12">
-            $message
+    <body>
+        #if($messages)
+            <div class="container" xmlns="http://java.sun.com/jsf/html">
+                #foreach($message in $messages)
+                <div class="row">
+                    <div class="col-md-12">
+                        $message
+                    </div>
+                </div>
+                #end
+            </div>
+        #end
+        <div class="container" xmlns="http://java.sun.com/jsf/html">
+            <div class="row">
+                <div class="col-md-12">
+                    #parse("${view}.vsl")
+                </div>
+            </div>
         </div>
-    </div>
-    #end
-</div>
-#end
-<div class="container" xmlns="http://java.sun.com/jsf/html">
-    <div class="row">
-        <div class="col-md-12">
-            #parse("${view}.vsl")
-        </div>
-    </div>
-</div>
-</body>
+    </body>
 </html>

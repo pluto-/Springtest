@@ -1,4 +1,4 @@
-package com.distributed.springtest.utils.records;
+package com.distributed.springtest.gamecontent;
 
 import java.sql.SQLException;
 
@@ -10,7 +10,7 @@ public class Generator {
     public static void main( String[] args ) throws SQLException {
         try {
             com.jajja.jorm.generator.Generator generator = new com.jajja.jorm.generator.Generator();
-            generator.addDatabase("gamecontent", "com.distributed.springtest.utils.records.gamecontent").addSchema("public").addTable("building_costs");
+            generator.addDatabase("gamecontent", "com.distributed.springtest.gamecontent.records").addSchema("public").addTable("resources");
             generator.fetchMetadata();
             System.out.println(generator);
         } catch (SQLException e) {

@@ -1,14 +1,13 @@
 package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.forms.BuildingForm;
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
@@ -33,14 +32,7 @@ public class BuildingsController {
         ModelAndView modelAndView = new ModelAndView("buildings");
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfo[] buildings = restTemplate.getForObject(gamecontentURL + "/buildings", BuildingInfo[].class);
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
         modelAndView.addObject("buildings", buildings);
-        Map<Integer, String> resources = new HashMap<>();
-        for(ResourceInfo resource : resourceInfos) {
-            resources.put(resource.getId(), resource.getName());
-        }
-        modelAndView.addObject("resources", resources);
-
         return modelAndView;
     }
 
@@ -49,7 +41,7 @@ public class BuildingsController {
         ModelAndView modelAndView = new ModelAndView("editBuilding");
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfo building = restTemplate.getForObject(gamecontentURL + "/buildings/" + id, BuildingInfo.class);
-        BuildingCost[] buildingCosts = restTemplate.getForObject(gamecontentURL + "/buildings/" + id + "/costs", BuildingCost[].class);
+        BuildingCostInfo[] buildingCosts = restTemplate.getForObject(gamecontentURL + "/buildings/" + id + "/costs", BuildingCostInfo[].class);
         ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
         Map<Integer, String> resources = new HashMap<>();
         for(ResourceInfo resource : resourceInfos) {
@@ -58,6 +50,7 @@ public class BuildingsController {
         BuildingForm form = new BuildingForm();
         form.setGeneratedAmount(building.getGeneratedAmount());
         form.setGeneratedId(building.getGeneratedId());
+        form.setGeneratedName(building.getGeneratedName());
         form.setName(building.getName());
         form.setId(building.getId());
         form.setBuildtime(building.getBuildtime());
@@ -70,20 +63,21 @@ public class BuildingsController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public Object editBuilding(@PathVariable Integer id, @ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
-        BuildingInfo building = BuildingInfo.findById(BuildingInfo.class, id);
+        BuildingInfo building = new BuildingInfo();
+        building.setId(id);
         building.setName(form.getName());
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.put(gamecontentURL + "/buildings/modify", building);
-        return new RedirectView("/buildings");
+        return new RedirectView("/buildings", true);
     }
 
     @RequestMapping(value = "/{id}/addCost", method = RequestMethod.POST)
     public Object addCost(@PathVariable Integer id, @RequestParam Integer newCostResourceId, @RequestParam Integer newCostAmount) {
         System.out.println(id + " " + newCostResourceId + ":" + newCostAmount);
-        BuildingCost cost = new BuildingCost();
+        BuildingCostInfo cost = new BuildingCostInfo();
         cost.setId(1);
         cost.setBuildingId(id);
         cost.setResourceId(newCostResourceId);
@@ -97,7 +91,7 @@ public class BuildingsController {
 
     @RequestMapping(value = "/{id}/modifyCost/{costId}", method = RequestMethod.POST)
     public Object modifyCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestParam Integer resourceId, @RequestParam Integer amount) {
-        BuildingCost cost = new BuildingCost();
+        BuildingCostInfo cost = new BuildingCostInfo();
         cost.setId(costId);
         cost.setBuildingId(id);
         cost.setResourceId(resourceId);
@@ -140,6 +134,6 @@ public class BuildingsController {
         building.setGeneratedAmount(form.getGeneratedAmount());
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Integer> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/add", building, Integer.class);
-        return new RedirectView("/buildings/" + responseEntity.getBody());
+        return new RedirectView("/buildings/" + responseEntity.getBody(), true);
     }
 }
