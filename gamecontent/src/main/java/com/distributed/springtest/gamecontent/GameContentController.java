@@ -1,10 +1,13 @@
 package com.distributed.springtest.gamecontent;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.gamecontent.records.Resource;
+import com.distributed.springtest.gamecontent.records.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
-import com.distributed.springtest.utils.records.playerresources.Building;
+import com.distributed.springtest.gamecontent.records.Building;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
+import com.jajja.jorm.Record;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +25,53 @@ public class GameContentController {
 
     @RequestMapping("/buildings")
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
-        List<BuildingInfo> buildingInfos = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
-
-        return new ResponseEntity<List<BuildingInfo>>(buildingInfos, HttpStatus.OK);
+        List<Building> buildings = Record.selectAll(Building.class, "SELECT b.*, r.name as generated_name FROM buildings b, resources r WHERE b.generated_id = r.id");
+        List<BuildingInfo> buildingInfoList = new ArrayList<>();
+        for(Building building : buildings) {
+            BuildingInfo buildingInfo = new BuildingInfo();
+            buildingInfo.setId(building.getId());
+            buildingInfo.setName(building.getName());
+            buildingInfo.setBuildtime(building.getBuildtime());
+            buildingInfo.setGeneratedId(building.getGeneratedId());
+            buildingInfo.setGeneratedName((String) building.get("generated_name"));
+            buildingInfo.setGeneratedAmount(building.getGeneratedAmount());
+            buildingInfoList.add(buildingInfo);
+        }
+        return new ResponseEntity<List<BuildingInfo>>(buildingInfoList, HttpStatus.OK);
     }
 
     @RequestMapping("/buildings/{id}")
     public ResponseEntity<BuildingInfo> getBuilding(@PathVariable Integer id) throws SQLException {
-        BuildingInfo buildingInfo = BuildingInfo.findById(BuildingInfo.class, id);
+        Building building = Building.findById(Building.class, id);
+        Resource resource = Resource.findById(Resource.class, building.getGeneratedId());
+        BuildingInfo buildingInfo = new BuildingInfo();
+        buildingInfo.setId(building.getId());
+        buildingInfo.setName(building.getName());
+        buildingInfo.setBuildtime(building.getBuildtime());
+        buildingInfo.setGeneratedId(building.getGeneratedId());
+        buildingInfo.setGeneratedName(resource.getName());
+        buildingInfo.setGeneratedAmount(building.getGeneratedAmount());
         return new ResponseEntity<BuildingInfo>(buildingInfo, HttpStatus.OK);
     }
 
     @RequestMapping("/buildings/{id}/costs")
-    public ResponseEntity<List<BuildingCost>> getBuildingCost(@PathVariable Integer id) throws SQLException {
-        List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1#", id);
-        return new ResponseEntity<List<BuildingCost>>(buildingCosts, HttpStatus.OK);
+    public ResponseEntity<List<BuildingCostInfo>> getBuildingCost(@PathVariable Integer id) throws SQLException {
+        List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT bc.*, r.name as resource_name FROM building_costs bc, resources r WHERE building_id = #1# AND bc.resource_id = r.id", id);
+        List<BuildingCostInfo> buildingCostInfoList = new ArrayList<>();
+        for(BuildingCost buildingCost : buildingCosts) {
+            BuildingCostInfo buildingCostInfo = new BuildingCostInfo();
+            buildingCostInfo.setId(buildingCost.getId());
+            buildingCostInfo.setResourceId(buildingCost.getResourceId());
+            buildingCostInfo.setResourceName((String) buildingCost.get("resource_name"));
+            buildingCostInfo.setBuildingId(buildingCost.getBuildingId());
+            buildingCostInfo.setAmount(buildingCost.getAmount());
+            buildingCostInfoList.add(buildingCostInfo);
+        }
+        return new ResponseEntity<List<BuildingCostInfo>>(buildingCostInfoList, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/buildings/{id}/costs/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addBuildingCost(@PathVariable Integer id, @RequestBody BuildingCost cost) throws SQLException {
+    public ResponseEntity<String> addBuildingCost(@PathVariable Integer id, @RequestBody BuildingCostInfo cost) throws SQLException {
         BuildingCost buildingCost = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", cost.getBuildingId(), cost.getResourceId());
         if(buildingCost == null) {
             buildingCost = new BuildingCost();
@@ -56,7 +87,7 @@ public class GameContentController {
     }
 
     @RequestMapping(value = "/buildings/{id}/costs/{costId}/modify", method = RequestMethod.PUT)
-    public void modifyBuildingCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestBody BuildingCost cost) throws SQLException {
+    public void modifyBuildingCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestBody BuildingCostInfo cost) throws SQLException {
         BuildingCost buildingCost = BuildingCost.findById(BuildingCost.class, cost.getId());
         if(buildingCost != null && buildingCost.getBuildingId().equals(id)) {
             buildingCost.setResourceId(cost.getResourceId());
@@ -77,56 +108,84 @@ public class GameContentController {
 
     @RequestMapping(value = "/buildings/add", method = RequestMethod.POST)
     public ResponseEntity<Integer> addBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
-        BuildingInfo buildingInfo = new BuildingInfo();
-        buildingInfo.setName(incomingBuildingInfo.getName());
-        buildingInfo.setGeneratedId(incomingBuildingInfo.getGeneratedId());
-        buildingInfo.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
-        buildingInfo.setBuildtime(incomingBuildingInfo.getBuildtime());
-        buildingInfo.save();
-        buildingInfo.transaction().commit();
-        return new ResponseEntity<Integer>(buildingInfo.getId(), HttpStatus.OK);
+        Building building = new Building();
+        building.setName(incomingBuildingInfo.getName());
+        building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
+        building.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
+        building.setBuildtime(incomingBuildingInfo.getBuildtime());
+        building.save();
+        building.transaction().commit();
+        return new ResponseEntity<Integer>(building.getId(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/buildings/modify", method = RequestMethod.PUT)
     public void modifyBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
-        BuildingInfo buildingInfo = Building.findById(BuildingInfo.class, incomingBuildingInfo.getId());
-        if(buildingInfo != null) {
-            buildingInfo.setName(incomingBuildingInfo.getName());
-            buildingInfo.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
-            buildingInfo.setGeneratedId(incomingBuildingInfo.getGeneratedId());
-            buildingInfo.save();
-            buildingInfo.transaction().commit();
+        Building building = Building.findById(Building.class, incomingBuildingInfo.getId());
+        if(building != null) {
+            building.setName(incomingBuildingInfo.getName());
+            building.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
+            building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
+            building.save();
+            building.transaction().commit();
         }
     }
 
     @RequestMapping(value = "/resources/add", method = RequestMethod.POST)
     public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
-        ResourceInfo resourceInfo = new ResourceInfo();
-        resourceInfo.setName(incomingResourceInfo.getName());
-        resourceInfo.save();
-        resourceInfo.transaction().commit();
-        return resourceInfo.getId();
+        Resource resource = new Resource();
+        resource.setName(incomingResourceInfo.getName());
+        resource.save();
+        resource.transaction().commit();
+        return resource.getId();
     }
 
     @RequestMapping("/resources")
     public ResponseEntity<List<ResourceInfo>> getResources() throws SQLException {
-        List<ResourceInfo> resources = ResourceInfo.selectAll(ResourceInfo.class, "SELECT * FROM resources");
-        return new ResponseEntity<List<ResourceInfo>>(resources, HttpStatus.OK);
+        List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources");
+        List<ResourceInfo> resourceInfoList = new ArrayList<>();
+        for(Resource resource : resources) {
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setId(resource.getId());
+            resourceInfo.setName(resource.getName());
+            resourceInfoList.add(resourceInfo);
+        }
+        return new ResponseEntity<List<ResourceInfo>>(resourceInfoList, HttpStatus.OK);
     }
 
     @RequestMapping("/resources/{id}")
     public ResponseEntity<ResourceInfo> getResource(@PathVariable Integer id) throws SQLException {
-        ResourceInfo resource = ResourceInfo.select(ResourceInfo.class, "SELECT * FROM resources WHERE id = #1#", id);
-        return new ResponseEntity<ResourceInfo>(resource, HttpStatus.OK);
+        Resource resource = Resource.select(Resource.class, "SELECT * FROM resources WHERE id = #1#", id);
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setId(resource.getId());
+        resourceInfo.setName(resource.getName());
+        return new ResponseEntity<ResourceInfo>(resourceInfo, HttpStatus.OK);
     }
 
     @RequestMapping("/buildingsAndCosts")
     public ResponseEntity<List<BuildingInfoWrapper>> getBuildingsAndCosts() throws SQLException {
-        List<BuildingInfoWrapper> resultList = new LinkedList<BuildingInfoWrapper>();
-        List<BuildingInfo> buildingInfoList = BuildingInfo.selectAll(BuildingInfo.class, "SELECT * FROM buildings");
-        for(BuildingInfo buildingInfo : buildingInfoList) {
-            List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1#", buildingInfo.getId());
-            resultList.add(new BuildingInfoWrapper(buildingInfo, buildingCosts));
+        List<BuildingInfoWrapper> resultList = new ArrayList<>();
+        List<Building> buildings = Building.selectAll(Building.class, "SELECT b.*, r.name as generated_name FROM buildings b, resources r WHERE b.generated_id = r.id");
+        for(Building building : buildings) {
+            BuildingInfo buildingInfo = new BuildingInfo();
+            buildingInfo.setId(building.getId());
+            buildingInfo.setName(building.getName());
+            buildingInfo.setBuildtime(building.getBuildtime());
+            buildingInfo.setGeneratedId(building.getGeneratedId());
+            buildingInfo.setGeneratedName((String) building.get("generated_name"));
+            buildingInfo.setGeneratedAmount(building.getGeneratedAmount());
+            List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT bc.*, r.name as resource_name FROM building_costs bc, resources r WHERE building_id = #1#", buildingInfo.getId());
+            List<BuildingCostInfo> buildingCostInfoList = new ArrayList<>();
+            for(BuildingCost buildingCost : buildingCosts) {
+                BuildingCostInfo buildingCostInfo = new BuildingCostInfo();
+                buildingCostInfo.setId(buildingCost.getId());
+                buildingCostInfo.setResourceId(buildingCost.getResourceId());
+                buildingCostInfo.setResourceName((String) buildingCost.get("resource_name"));
+                buildingCostInfo.setBuildingId(buildingCost.getBuildingId());
+                buildingCostInfo.setAmount(buildingCost.getAmount());
+                buildingCostInfoList.add(buildingCostInfo);
+            }
+
+            resultList.add(new BuildingInfoWrapper(buildingInfo, buildingCostInfoList));
         }
         return new ResponseEntity<List<BuildingInfoWrapper>>(resultList, HttpStatus.OK);
     }

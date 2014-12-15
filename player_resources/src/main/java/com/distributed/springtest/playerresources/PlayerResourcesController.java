@@ -1,6 +1,5 @@
 package com.distributed.springtest.playerresources;
 
-import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
@@ -50,12 +49,12 @@ public class PlayerResourcesController {
     }
 
     @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
-    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) throws NotEnoughResourcesException {
-        List<BuildingCost> costs = null;
+    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) {
+        List<BuildingCostInfo> costs = null;
         List<Resource> playerResources = null;
         try {
             costs = getBuildingCost(wrapper.getBuildingId());
-            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
+            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE id = #1#", wrapper.getPlayerId());
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,10 +63,9 @@ public class PlayerResourcesController {
         if(hasEnoughMaterials(playerResources, costs)) {
 
             Construction construction = new Construction();
-                            System.err.println("BUYING");
             try {
                 // Removing costs from playerResources list.
-                for (BuildingCost cost : costs) {
+                for (BuildingCostInfo cost : costs) {
                     for (Resource resource : playerResources) {
                         if (resource.getResourceId().equals(cost.getResourceId())) {
                             resource.setAmount(resource.getAmount() - cost.getAmount());
@@ -94,14 +92,13 @@ public class PlayerResourcesController {
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        System.err.println("Throwing NotEnoughResourcesException.");
-        throw new NotEnoughResourcesException();
+        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCost> costs) {
+    private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCostInfo> costs) {
 
         boolean isEnough;
-        for(BuildingCost cost : costs) {
+        for(BuildingCostInfo cost : costs) {
             isEnough = false;
 
             for(Resource resource : playerResources) {
@@ -193,11 +190,11 @@ public class PlayerResourcesController {
         return Arrays.asList(buildingInfos);
     }
 
-    private static List<BuildingCost> getBuildingCost(int buildingId) throws IOException {
+    private static List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/buildings/"+ buildingId+"/costs";
         System.err.println(uri);
-        BuildingCost[] buildingCosts = restTemplate.getForObject(uri, BuildingCost[].class);
+        BuildingCostInfo[] buildingCosts = restTemplate.getForObject(uri, BuildingCostInfo[].class);
         return Arrays.asList(buildingCosts);
     }
 }

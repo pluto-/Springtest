@@ -1,25 +1,24 @@
 package com.distributed.springtest.utils.records.gamecontent;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.jajja.jorm.Jorm;
-import com.jajja.jorm.Record;
 
-@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
-@Jorm(database= "gamecontent", schema="public", table="resources", primaryKey="id")
-public class ResourceInfo extends Record {
+public class ResourceInfo {
+
+    private Integer id;
+    private String name;
+
     public Integer getId() {
-        return get("id", Integer.class);
+        return id;
     }
 
     public void setId(Integer id) {
-        set("id", id);
+        this.id = id;
     }
 
     public String getName() {
-        return get("name", String.class);
+        return name;
     }
 
     public void setName(String name) {
-        set("name", name);
+        this.name = name;
     }
 }

@@ -1,10 +1,6 @@
 package com.distributed.springtest.client.forms;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
-import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
-import org.apache.commons.collections.FactoryUtils;
-import org.apache.commons.collections.ListUtils;
-import org.springframework.util.AutoPopulatingList;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -29,13 +25,24 @@ public class BuildingForm {
     @NotNull
     private Float generatedAmount;
 
-    private List<BuildingCost> buildingCosts = new ArrayList<>();
+    public String getGeneratedName() {
+        return generatedName;
+    }
 
-    public List<BuildingCost> getBuildingCosts() {
+    public void setGeneratedName(String generatedName) {
+        this.generatedName = generatedName;
+    }
+
+    @NotNull
+    private String generatedName;
+
+    private List<BuildingCostInfo> buildingCosts = new ArrayList<>();
+
+    public List<BuildingCostInfo> getBuildingCosts() {
         return buildingCosts;
     }
 
-    public void setBuildingCosts(List<BuildingCost> buildingCosts) {
+    public void setBuildingCosts(List<BuildingCostInfo> buildingCosts) {
         this.buildingCosts = buildingCosts;
     }
 

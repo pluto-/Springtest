@@ -46,7 +46,7 @@
                 <td>
                     <select type="text" class="form-control" id="inputCostResourceId$velocityCount" name="resourceId">
                         #foreach($resourceId in $resources.keySet())
-                            <option value=$resourceId #if($buildingCost.resource_id.equals($resourceId)) selected #end>
+                            <option value=$resourceId #if($buildingCost.resourceId.equals($resourceId)) selected #end>
                                 $resourceId: $resources.get($resourceId)</option>
                         #end
                     </select>

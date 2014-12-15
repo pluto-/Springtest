@@ -1,49 +1,60 @@
 package com.distributed.springtest.utils.records.gamecontent;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.jajja.jorm.Jorm;
-import com.jajja.jorm.Record;
+public class BuildingInfo{
 
-@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
-@Jorm(database= "gamecontent", schema="public", table="buildings", primaryKey="id")
-public class BuildingInfo extends Record {
+    private Integer id;
+    private String name;
+    private Integer buildtime;
+    private Integer generatedId;
+    private String generatedName;
+
+    public String getGeneratedName() {
+        return generatedName;
+    }
+
+    public void setGeneratedName(String generatedName) {
+        this.generatedName = generatedName;
+    }
+
+    private Float generatedAmount;
+
     public Integer getId() {
-        return get("id", Integer.class);
+        return id;
     }
 
     public void setId(Integer id) {
-        set("id", id);
+        this.id = id;
     }
 
     public String getName() {
-        return get("name", String.class);
+        return name;
     }
 
     public void setName(String name) {
-        set("name", name);
+        this.name = name;
     }
 
     public Integer getBuildtime() {
-        return get("buildtime", Integer.class);
+        return buildtime;
     }
 
     public void setBuildtime(Integer buildtime) {
-        set("buildtime", buildtime);
+        this.buildtime = buildtime;
     }
 
     public Integer getGeneratedId() {
-        return get("generated_id", Integer.class);
+        return generatedId;
     }
 
     public void setGeneratedId(Integer generatedId) {
-        set("generated_id", generatedId);
+        this.generatedId = generatedId;
     }
 
     public Float getGeneratedAmount() {
-        return get("generated_amount", Float.class);
+        return generatedAmount;
     }
 
     public void setGeneratedAmount(Float generatedAmount) {
-        set("generated_amount", generatedAmount);
+        this.generatedAmount = generatedAmount;
     }
 }

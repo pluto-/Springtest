@@ -1,13 +1,7 @@
 package com.distributed.springtest.client.forms.player;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
-import org.apache.commons.collections.FactoryUtils;
-import org.apache.commons.collections.ListUtils;
-
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Patrik on 2014-12-09.
