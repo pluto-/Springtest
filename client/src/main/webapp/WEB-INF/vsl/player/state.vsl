@@ -1,5 +1,4 @@
 <legend>Player State</legend>
-<button class="button" onclick="location.href = '$link.getURI()/new'">New</button>
 
 <h3>Resources</h3>
 <table class="table">
@@ -21,6 +20,7 @@
 </table>
 
 <h3>Buildings</h3>
+<button class="button" onclick="location.href = '$link.getURI()/buy'">Buy</button>
 <table class="table">
     <thead>
     <tr>

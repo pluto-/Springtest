@@ -54,7 +54,7 @@ public class PlayerResourcesController {
         List<Resource> playerResources = null;
         try {
             costs = getBuildingCost(wrapper.getBuildingId());
-            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE id = #1#", wrapper.getPlayerId());
+            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,6 +63,7 @@ public class PlayerResourcesController {
         if(hasEnoughMaterials(playerResources, costs)) {
 
             Construction construction = new Construction();
+                            System.err.println("BUYING");
             try {
                 // Removing costs from playerResources list.
                 for (BuildingCost cost : costs) {
@@ -92,7 +93,7 @@ public class PlayerResourcesController {
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.NOT_ACCEPTABLE);
     }
 
     private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCost> costs) {

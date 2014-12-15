@@ -2,25 +2,33 @@ package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.forms.player.BuildingForm;
+import com.distributed.springtest.client.forms.player.BuyBuildingForm;
 import com.distributed.springtest.client.forms.player.ConstructionForm;
 import com.distributed.springtest.client.forms.player.ResourceForm;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Construction;
 import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
+import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Jonas on 2014-12-11.
@@ -36,7 +44,7 @@ public class PlayerStateController {
     private String gamecontentURL;
 
     @RequestMapping("")
-    public Object state() throws SQLException {
+     public Object state() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/state");
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -78,6 +86,45 @@ public class PlayerStateController {
         modelAndView.addObject("resources", resources);
         modelAndView.addObject("buildings", buildings);
         modelAndView.addObject("constructions", constructions);
+
+        return modelAndView;
+    }
+
+    @RequestMapping("/buy")
+    public Object buy() throws SQLException {
+        ModelAndView modelAndView = new ModelAndView("player/buy");
+
+        List<BuyBuildingForm> buildings = new ArrayList<>();
+
+        RestTemplate restTemplate = new RestTemplate();
+        BuildingInfoWrapper[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildingsAndCosts", BuildingInfoWrapper[].class);
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        Map<Integer, String> idToName = new HashMap<>();
+        for(ResourceInfo resourceInfo : resourceInfos) {
+            idToName.put(resourceInfo.getId(), resourceInfo.getName());
+        }
+
+        modelAndView.addObject("buildings", Arrays.asList(buildingInfos));
+        modelAndView.addObject("idToName", idToName);
+
+        return modelAndView;
+    }
+    @RequestMapping("/buy/{id}")
+    public Object buy(@PathVariable Integer id) throws SQLException {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
+
+        BuyBuildingWrapper wrapper = new BuyBuildingWrapper(userAuth.getPlayerId(), id);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+
+        ModelAndView modelAndView = new ModelAndView(new RedirectView("/player/state"));
+
+        if(buy.getStatusCode() != HttpStatus.OK) {
+            modelAndView.addObject("error", buy.getBody());
+        }
 
         return modelAndView;
     }

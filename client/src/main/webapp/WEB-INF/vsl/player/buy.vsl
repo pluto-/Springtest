@@ -1,0 +1,28 @@
+<legend>Buy building</legend>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Building</th>
+        <th>Generates</th>
+        <th>Amount</th>
+        <th>Cost</th>
+        <th>Build time</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($building in $buildings)
+        <tr>
+            <td>$building.buildingInfo.name</td>
+            <td>$idToName.get($building.buildingInfo.generated_id)</td>
+            <td>$building.buildingInfo.generated_amount</td>
+            <td>#foreach($cost in $building.buildingCosts)
+                $idToName.get($cost.resource_id):$cost.amount
+            #end</td>
+            <td>$building.buildingInfo.buildtime</td>
+            <td><button class="button" onclick="location.href = '$link.getURI()/$building.buildingInfo.id'">Buy</button></td>
+        </tr>
+        #end
+    </tbody>
+</table>

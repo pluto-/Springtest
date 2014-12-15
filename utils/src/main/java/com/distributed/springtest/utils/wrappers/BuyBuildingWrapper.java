@@ -5,6 +5,18 @@ package com.distributed.springtest.utils.wrappers;
  */
 public class BuyBuildingWrapper {
 
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
+    }
+
+    public void setBuildingId(int buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public BuyBuildingWrapper() {
+
+    }
+
     private int playerId;
     private int buildingId;
 
