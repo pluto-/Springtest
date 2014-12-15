@@ -75,29 +75,56 @@ public class BuildingsController {
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
-        //TODO handle new buildingcosts
-        building.save();
-        building.transaction().commit();
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.put(gamecontentURL + "/buildings/modify", building);
         return new RedirectView("/buildings");
     }
 
     @RequestMapping(value = "/{id}/addCost", method = RequestMethod.POST)
     public Object addCost(@PathVariable Integer id, @RequestParam Integer newCostResourceId, @RequestParam Integer newCostAmount) {
+        System.out.println(id + " " + newCostResourceId + ":" + newCostAmount);
         BuildingCost cost = new BuildingCost();
+        cost.setId(1);
         cost.setBuildingId(id);
         cost.setResourceId(newCostResourceId);
         cost.setAmount(newCostAmount);
         RestTemplate restTemplate = new RestTemplate();
+        System.out.println(cost.getId() + ":" + cost.getBuildingId() + "-" + cost.getResourceId() + "-" + cost.getAmount());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/" + id + "/costs/add", cost, String.class);
         System.out.println(responseEntity.getStatusCode() + ": " + responseEntity.getBody());
         return new RedirectView("/buildings/" + id, true);
     }
 
+    @RequestMapping(value = "/{id}/modifyCost/{costId}", method = RequestMethod.POST)
+    public Object modifyCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestParam Integer resourceId, @RequestParam Integer amount) {
+        BuildingCost cost = new BuildingCost();
+        cost.setId(costId);
+        cost.setBuildingId(id);
+        cost.setResourceId(resourceId);
+        cost.setAmount(amount);
+        System.out.println(cost.getId() + " - " + cost.getBuildingId() + " : " + cost.getResourceId() + " - " + cost.getAmount());
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.put(gamecontentURL + "/buildings/" + id + "/costs/" + costId + "/modify", cost);
+        return new RedirectView("/buildings/" + id, true);
+    }
+
+    @RequestMapping(value = "/{id}/removeCost/{costId}")
+    public Object removeCost(@PathVariable Integer id, @PathVariable Integer costId) {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.delete(gamecontentURL + "/buildings/" + id + "/costs/" + costId + "/delete");
+        return new RedirectView("/buildings/" + id, true);
+    }
+
+
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newBuilding() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("editBuilding");
         RestTemplate restTemplate = new RestTemplate();
-        ResourceInfo[] resources = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        Map<Integer,String> resources = new HashMap<>();
+        for(ResourceInfo resourceInfo : resourceInfos) {
+            resources.put(resourceInfo.getId(), resourceInfo.getName());
+        }
         modelAndView.addObject("edit", false);
         modelAndView.addObject("resources", resources);
         return modelAndView;
@@ -106,12 +133,13 @@ public class BuildingsController {
     @RequestMapping(value = "/new", method = RequestMethod.POST)
     public Object newBuildingx(@ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
         BuildingInfo building = new BuildingInfo();
+        building.setId(1);
         building.setName(form.getName());
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
-        building.save();
-        building.transaction().commit();
-        return new RedirectView("/buildings");
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Integer> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/add", building, Integer.class);
+        return new RedirectView("/buildings/" + responseEntity.getBody());
     }
 }
