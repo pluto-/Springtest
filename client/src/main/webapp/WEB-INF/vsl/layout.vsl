@@ -13,7 +13,6 @@
 </head>
 
 <body>
-
 #if($messages)
 <div class="container" xmlns="http://java.sun.com/jsf/html">
     #foreach($message in $messages)
