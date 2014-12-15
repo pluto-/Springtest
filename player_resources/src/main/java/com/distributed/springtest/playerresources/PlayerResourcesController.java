@@ -1,8 +1,8 @@
 package com.distributed.springtest.playerresources;
 
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
 import org.springframework.http.HttpStatus;
@@ -54,7 +54,7 @@ public class PlayerResourcesController {
         List<Resource> playerResources = null;
         try {
             costs = getBuildingCost(wrapper.getBuildingId());
-            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE id = #1#", wrapper.getPlayerId());
+            playerResources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);

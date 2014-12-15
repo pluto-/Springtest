@@ -6,7 +6,6 @@ import com.distributed.springtest.client.forms.player.BuyBuildingForm;
 import com.distributed.springtest.client.forms.player.ConstructionForm;
 import com.distributed.springtest.client.forms.player.ResourceForm;
 import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
@@ -55,7 +54,7 @@ public class PlayerStateController {
 
     @RequestMapping("/state")
      public Object state() throws SQLException {
-        ModelAndView modelAndView = new ModelAndView("state");
+        ModelAndView modelAndView = new ModelAndView("player/state");
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
@@ -120,7 +119,7 @@ public class PlayerStateController {
         return modelAndView;
     }
     @RequestMapping("/buy/{id}")
-    public Object buy(@PathVariable Integer id) throws SQLException {
+    public Object buy(@PathVariable Integer id, HttpSession session) throws SQLException {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
@@ -128,12 +127,9 @@ public class PlayerStateController {
         BuyBuildingWrapper wrapper = new BuyBuildingWrapper(userAuth.getPlayerId(), id);
 
         RestTemplate restTemplate = new RestTemplate();
-        ModelAndView modelAndView = new ModelAndView("redirect:/state");
+        ModelAndView modelAndView = new ModelAndView(new RedirectView("/player/buy"));
 
-
-        //ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
-
-        modelAndView.addObject("message", "Hej!");
+        ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
 
         return modelAndView;
     }

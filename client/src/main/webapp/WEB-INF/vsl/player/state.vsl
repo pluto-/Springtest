@@ -20,7 +20,7 @@
 </table>
 
 <h3>Buildings</h3>
-<button class="button" onclick="location.href = '$link.getURI()/buy'">Buy</button>
+<button class="button" onclick="location.href = '$link.setRelative("/player/buy")'">Buy</button>
 <table class="table">
     <thead>
     <tr>

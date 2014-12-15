@@ -1,6 +1,6 @@
 package com.distributed.springtest.client.forms.player;
 
-import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
+import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import org.apache.commons.collections.FactoryUtils;
 import org.apache.commons.collections.ListUtils;
 
@@ -23,13 +23,13 @@ public class BuyBuildingForm {
     private String generatedAmount;
 
     @NotNull
-    private BuildingCost[] costs;
+    private BuildingCostInfo[] costs;
 
-    public BuildingCost[] getCosts() {
+    public BuildingCostInfo[] getCosts() {
         return costs;
     }
 
-    public void setCosts(BuildingCost[] costs) {
+    public void setCosts(BuildingCostInfo[] costs) {
         this.costs = costs;
     }
 
