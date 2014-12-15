@@ -1,6 +1,71 @@
 <div class="row">
     <div class="col-md-12">
         <legend>Player State</legend>
-        <button class="button" onclick="location.href = '$link.getURI()/new'">New</button>
+        <h1>Player State</h1>
+
+        <h2>Resources</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Resource</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($resource in $resources)
+                <tr>
+                    <td>$resource.name</td>
+                    <td>$resource.amount</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+
+        <h2>Buildings</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Building</th>
+                <th>Amount</th>
+                <th>Produces</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($building in $buildings)
+                <tr>
+                    <td>$building.name</td>
+                    <td>$building.amount</td>
+                    <td>$building.generates</td>
+                    <td>$building.generatedAmount</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+
+        <h2>Constructing</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Building</th>
+                <th>Started At</th>
+                <th>Finishes At</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($construction in $constructions)
+                <tr>
+                    <td>$construction.name</td>
+                    <td>$construction.started</td>
+                    <td>$construction.finishes</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+
+
     </div>
 </div>

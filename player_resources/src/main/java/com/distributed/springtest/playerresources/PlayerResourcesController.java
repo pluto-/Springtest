@@ -24,50 +24,8 @@ import java.util.List;
 @RestController
 public class PlayerResourcesController {
 
-    /*
-    @RequestMapping("/player_resources")
-    public Object getPlayerResources(@RequestParam(value="player_id") int playerId) {
-        List<Resource> resources = null;
-        try {
-
-            updatePlayerResources(playerId);
-            resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
-
-        }  catch (SQLException | IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return resources;
-    }
-
-    @RequestMapping("/player_buildings")
-    public Object getPlayerBuildings(@RequestParam(value="player_id") int playerId) {
-
-        List<Building> buildings = null;
-        try {
-            buildings = Building.selectAll(Building.class, "SELECT * FROM buildings WHERE player_id = #1#", playerId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return buildings;
-    }
-
-    @RequestMapping("/player_constructions")
-    public Object getPlayerConstructions(@RequestParam(value="player_id") int playerId) {
-
-        List<Construction> constructions = null;
-        try {
-            constructions = Construction.selectAll(Construction.class, "SELECT * FROM construction WHERE player_id = #1#", playerId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return constructions;
-    }*/
-
     @RequestMapping("/state/{id}")
-    public Object getPlayerResourcesBuildingsConstructions(@PathVariable("id") Integer playerId) {
+    public Object getState(@PathVariable("id") Integer playerId) {
 
         try {
 
@@ -79,6 +37,9 @@ public class PlayerResourcesController {
 
             PlayerStateWrapper wrapper = new PlayerStateWrapper(resources, buildings, constructions);
 
+
+
+            System.err.println("RETURNING!");
             return wrapper;
 
         } catch (SQLException |IOException e) {
@@ -224,14 +185,15 @@ public class PlayerResourcesController {
 
     private static List<BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getAddressAndPort() + "/getBuildings";
+        String uri = PropertiesLoader.getAddressAndPort() + "/buildings";
         BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
         return Arrays.asList(buildingInfos);
     }
 
     private static List<BuildingCost> getBuildingCost(int buildingId) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getAddressAndPort() + "/getBuildingCost/" + buildingId;
+        String uri = PropertiesLoader.getAddressAndPort() + "/buildings/"+ buildingId+"/costs";
+        System.err.println(uri);
         BuildingCost[] buildingCosts = restTemplate.getForObject(uri, BuildingCost[].class);
         return Arrays.asList(buildingCosts);
     }

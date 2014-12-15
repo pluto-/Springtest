@@ -21,6 +21,22 @@ public class PlayerStateWrapper {
         this.constructions = constructions;
     }
 
+    public PlayerStateWrapper() {
+
+    }
+
+    public void setConstructions(List<Construction> constructions) {
+        this.constructions = constructions;
+    }
+
+    public void setBuildings(List<Building> buildings) {
+        this.buildings = buildings;
+    }
+
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
+    }
+
     public List<Resource> getResources() {
         return resources;
     }

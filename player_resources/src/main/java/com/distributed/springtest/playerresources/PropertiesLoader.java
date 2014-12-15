@@ -12,7 +12,6 @@ import java.util.Properties;
 public class PropertiesLoader {
 
     public static String getAddressAndPort() throws IOException {
-        String result = "";
         Properties prop = new Properties();
         String propFileName = "player_resources/src/main/resources/playerresources.properties";
 
@@ -24,10 +23,6 @@ public class PropertiesLoader {
             throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
         }
 
-        // get the property value and print it out
-        String address = prop.getProperty("game_content_server_address");
-        String port = prop.getProperty("game_content_server_port");
-
-        return "http://" + address + ":" + port;
+        return prop.getProperty("hosts.gamecontent");
     }
 }
