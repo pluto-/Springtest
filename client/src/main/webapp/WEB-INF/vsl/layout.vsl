@@ -14,15 +14,13 @@
 
 <body>
 
-#if($messages)
+#if($message)
 <div class="container" xmlns="http://java.sun.com/jsf/html">
-    #foreach($message in $messages)
     <div class="row">
         <div class="col-md-12">
             $message
         </div>
     </div>
-    #end
 </div>
 #end
 <div class="container" xmlns="http://java.sun.com/jsf/html">

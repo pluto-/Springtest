@@ -5,6 +5,7 @@ import com.distributed.springtest.client.forms.player.BuildingForm;
 import com.distributed.springtest.client.forms.player.BuyBuildingForm;
 import com.distributed.springtest.client.forms.player.ConstructionForm;
 import com.distributed.springtest.client.forms.player.ResourceForm;
+import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
@@ -15,17 +16,26 @@ import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -34,7 +44,7 @@ import java.util.*;
  * Created by Jonas on 2014-12-11.
  */
 @Controller
-@RequestMapping("/player/state")
+@RequestMapping("/player")
 public class PlayerStateController {
 
     @Value("${hosts.playerresources}")
@@ -43,9 +53,9 @@ public class PlayerStateController {
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
-    @RequestMapping("")
+    @RequestMapping("/state")
      public Object state() throws SQLException {
-        ModelAndView modelAndView = new ModelAndView("player/state");
+        ModelAndView modelAndView = new ModelAndView("state");
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
@@ -118,14 +128,28 @@ public class PlayerStateController {
         BuyBuildingWrapper wrapper = new BuyBuildingWrapper(userAuth.getPlayerId(), id);
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+        ModelAndView modelAndView = new ModelAndView("redirect:/state");
 
-        ModelAndView modelAndView = new ModelAndView(new RedirectView("/player/state"));
 
-        if(buy.getStatusCode() != HttpStatus.OK) {
-            modelAndView.addObject("error", buy.getBody());
-        }
+        //ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+
+        modelAndView.addObject("message", "Hej!");
 
         return modelAndView;
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    public String handleNotEnoughResourcesException(HttpClientErrorException ex, HttpSession session) {
+
+        session.setAttribute("message", ex.getMessage());
+        return "redirect:/";
+
+        /*System.err.println("HANDLING");
+        ModelAndView model = new ModelAndView("redirect:/");
+        redirectAttributes.addFlashAttribute("message", ex.getMessage());
+        //model.addObject("message", ex.getMessage());
+
+        return model;*/
+
     }
 }

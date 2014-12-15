@@ -1,5 +1,6 @@
 package com.distributed.springtest.playerresources;
 
+import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCost;
@@ -49,7 +50,7 @@ public class PlayerResourcesController {
     }
 
     @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
-    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) {
+    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) throws NotEnoughResourcesException {
         List<BuildingCost> costs = null;
         List<Resource> playerResources = null;
         try {
@@ -93,7 +94,8 @@ public class PlayerResourcesController {
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.NOT_ACCEPTABLE);
+        System.err.println("Throwing NotEnoughResourcesException.");
+        throw new NotEnoughResourcesException();
     }
 
     private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCost> costs) {
