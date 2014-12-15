@@ -20,8 +20,9 @@ public class BuildingForm {
     private String generates;
 
     @NotNull
-    private Float generatedAmount;
+    private String generatedAmount;
 
+    /*
     @NotNull
     private Integer amount;
 
@@ -31,7 +32,7 @@ public class BuildingForm {
 
     public void setAmount(Integer amount) {
         this.amount = amount;
-    }
+    }*/
 
     private List<BuildingCost> buildingCosts = ListUtils.lazyList(new ArrayList<BuildingCost>(), FactoryUtils.instantiateFactory(BuildingCost.class));
 
@@ -59,11 +60,11 @@ public class BuildingForm {
         this.generates = generates;
     }
 
-    public Float getGeneratedAmount() {
+    public String getGeneratedAmount() {
         return generatedAmount;
     }
 
-    public void setGeneratedAmount(Float generatedAmount) {
+    public void setGeneratedAmount(String generatedAmount) {
         this.generatedAmount = generatedAmount;
     }
 }

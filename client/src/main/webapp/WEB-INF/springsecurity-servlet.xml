@@ -13,8 +13,8 @@ http://www.springframework.org/schema/security/spring-security-3.2.xsd">
              class="org.springframework.jdbc.datasource.DriverManagerDataSource">
               <property name="driverClassName" value="org.postgresql.Driver" />
               <property name="url" value="jdbc:postgresql://localhost:5432/login" />
-              <property name="username" value="login" />
-              <property name="password" value="login" />
+              <property name="username" value="jonas" />
+              <property name="password" value="apa" />
        </bean>
 
        <security:http auto-config="true">

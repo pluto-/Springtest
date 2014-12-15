@@ -59,11 +59,10 @@ public class PlayerStateController {
         for(Building building : wrapper.getBuildings()) {
             BuildingInfo buildingInfo = restTemplate.getForObject(gamecontentURL + "/buildings/" + building.getBuildingId(), BuildingInfo.class);
             BuildingForm form = new BuildingForm();
-            form.setName(buildingInfo.getName());
-            form.setAmount(building.getAmount());
+            form.setName(buildingInfo.getName() + " x" + building.getAmount());
             ResourceInfo resourceInfo = restTemplate.getForObject(gamecontentURL + "/resources/" + buildingInfo.getGeneratedId(), ResourceInfo.class);
             form.setGenerates(resourceInfo.getName());
-            form.setGeneratedAmount(buildingInfo.getGeneratedAmount() * form.getAmount());
+            form.setGeneratedAmount(buildingInfo.getGeneratedAmount() + " x " + building.getAmount() + " (" + (buildingInfo.getGeneratedAmount() * building.getAmount()) + ")");
             buildings.add(form);
         }
         for(Construction construction : wrapper.getConstructions()) {

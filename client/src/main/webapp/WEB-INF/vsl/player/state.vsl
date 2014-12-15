@@ -1,2 +1,63 @@
 <legend>Player State</legend>
 <button class="button" onclick="location.href = '$link.getURI()/new'">New</button>
+
+<h3>Resources</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Resource</th>
+        <th>Amount</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($resource in $resources)
+        <tr>
+            <td>$resource.name</td>
+            <td>$resource.amount</td>
+        </tr>
+        #end
+    </tbody>
+</table>
+
+<h3>Buildings</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Building</th>
+        <th>Generates</th>
+        <th>Amount</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($building in $buildings)
+        <tr>
+            <td>$building.name</td>
+            <td>$building.generates</td>
+            <td>$building.generatedAmount</td>
+        </tr>
+        #end
+    </tbody>
+</table>
+
+<h3>Constructions</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Building</th>
+        <th>Started</th>
+        <th>Finishes</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($construction in $constructions)
+        <tr>
+            <td>$construction.name</td>
+            <td>$construction.started</td>
+            <td>$construction.finishes</td>
+        </tr>
+        #end
+    </tbody>
+</table>
