@@ -19,7 +19,7 @@
             <td>$building.buildtime</td>
             <td>$building.generatedName</td>
             <td>$building.generatedAmount</td>
-            <td><a href="$link.setRelative("buildings/$building.id")">edit</a></td>
+            <td><a href="$link.setRelative("admin/buildings/$building.id")">edit</a></td>
         </tr>
         #end
     </tbody>

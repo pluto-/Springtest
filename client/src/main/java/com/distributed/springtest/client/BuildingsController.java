@@ -112,7 +112,7 @@ public class BuildingsController {
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newBuilding() throws SQLException {
-        ModelAndView modelAndView = new ModelAndView("editBuilding");
+        ModelAndView modelAndView = new ModelAndView("admin/editBuilding");
         RestTemplate restTemplate = new RestTemplate();
         ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
         Map<Integer,String> resources = new HashMap<>();
@@ -134,6 +134,6 @@ public class BuildingsController {
         building.setGeneratedAmount(form.getGeneratedAmount());
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Integer> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/add", building, Integer.class);
-        return new RedirectView("/buildings/" + responseEntity.getBody(), true);
+        return new RedirectView("/admin/buildings/" + responseEntity.getBody(), true);
     }
 }

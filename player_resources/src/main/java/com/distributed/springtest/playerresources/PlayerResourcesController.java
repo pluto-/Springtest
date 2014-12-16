@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 public class PlayerResourcesController {
 
-    @RequestMapping("/{player_id}/resources/modify/{resource_id}/{amount}")
+    @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
     public Object modifyPlayerResource(@PathVariable("player_id") Integer playerId, @PathVariable("resource_id") Integer resourceId, @PathVariable("amount") Integer amount) {
 
         try {
@@ -36,6 +36,9 @@ public class PlayerResourcesController {
 
             for(Resource resource : resources) {
                 if(resource.getResourceId() == resourceId) {
+                    if(amount < 0 && amount > resource.getAmount()) {
+                        return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
+                    }
                     resource.setAmount(resource.getAmount() + amount);
                     resource.save();
                     resource.transaction().commit();

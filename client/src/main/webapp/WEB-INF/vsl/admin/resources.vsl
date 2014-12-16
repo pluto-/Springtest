@@ -12,7 +12,7 @@
         <tr>
             <td>$resource.id</td>
             <td>$resource.name</td>
-            <td><a href="$link.setRelative("resources/$resource.id")">edit</a></td>
+            <td><a href="$link.setRelative("admin/resources/$resource.id")">edit</a></td>
         </tr>
         #end
     </tbody>

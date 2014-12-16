@@ -24,7 +24,7 @@ import java.util.Arrays;
  * Created by Patrik on 2014-12-09.
  */
 @Controller
-@RequestMapping("/resources")
+@RequestMapping("/admin/resources")
 public class ResourcesController {
 
     @Value("${hosts.gamecontent}")
@@ -32,7 +32,7 @@ public class ResourcesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Object resources(HttpServletRequest request) throws SQLException, IOException {
-        ModelAndView modelAndView = new ModelAndView("resources");
+        ModelAndView modelAndView = new ModelAndView("admin/resources");
         RestTemplate restTemplate = new RestTemplate();
         String uri = gamecontentURL + "/resources";
         ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
@@ -42,7 +42,7 @@ public class ResourcesController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getResource(@PathVariable Integer id) throws SQLException, IOException {
-        ModelAndView modelAndView = new ModelAndView("editResource");
+        ModelAndView modelAndView = new ModelAndView("admin/editResource");
 
         RestTemplate restTemplate = new RestTemplate();
         String uri = gamecontentURL + "/resources/" + id;
@@ -59,9 +59,8 @@ public class ResourcesController {
         resourceInfo.setId(id);
         resourceInfo.setName(form.getName());
         RestTemplate restTemplate = new RestTemplate();
-        String uri = gamecontentURL + "/resources/" + id;
-         restTemplate.put(gamecontentURL + "/resources/" + id, resourceInfo, ResourceInfo.class);
-        return new RedirectView("/resources/");
+        restTemplate.put(gamecontentURL + "/resources/edit", resourceInfo, ResourceInfo.class);
+        return new RedirectView("/admin/resources/");
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
@@ -74,7 +73,7 @@ public class ResourcesController {
         String uri = gamecontentURL + "/resources/add";
         ResponseEntity<Integer> resourceId = restTemplate.postForEntity(uri, resource, Integer.class);
 
-        return new RedirectView("/resources");
+        return new RedirectView("/admin/resources");
     }
 
 }
