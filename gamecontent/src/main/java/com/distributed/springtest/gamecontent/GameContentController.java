@@ -174,6 +174,14 @@ public class GameContentController {
         return new ResponseEntity<ResourceInfo>(resourceInfo, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/resources/edit", method = RequestMethod.PUT)
+    public void editResource(@RequestBody ResourceInfo resourceInfo) throws SQLException {
+        Resource resource = Resource.findById(Resource.class, resourceInfo.getId());
+        resource.setName(resourceInfo.getName());
+        resource.save();
+        resource.transaction().commit();
+    }
+
     @RequestMapping("/buildingsAndCosts")
     public ResponseEntity<List<BuildingInfoWrapper>> getBuildingsAndCosts() throws SQLException {
         List<BuildingInfoWrapper> resultList = new ArrayList<>();
