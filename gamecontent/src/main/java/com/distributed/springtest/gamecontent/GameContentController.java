@@ -8,13 +8,14 @@ import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.gamecontent.records.Building;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.jajja.jorm.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -22,6 +23,8 @@ import java.util.List;
  */
 @RestController
 public class GameContentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(GameContentController.class);
 
     @RequestMapping("/buildings")
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
@@ -82,6 +85,7 @@ public class GameContentController {
             buildingCost.transaction().commit();
             return new ResponseEntity<String>("OK", HttpStatus.OK);
         } else {
+            logger.error("A cost with that resource already exists");
             return new ResponseEntity<String>("A cost with that resource type already exists", HttpStatus.BAD_REQUEST);
         }
     }
@@ -103,6 +107,13 @@ public class GameContentController {
         if(buildingCost != null && buildingCost.getBuildingId().equals(id)) {
             buildingCost.delete();
             buildingCost.transaction().commit();
+        } else {
+            if(buildingCost == null) {
+                logger.error("No such building exists");
+            } else {
+                logger.error("Building cost ID and building ID mismatch");
+            }
+
         }
     }
 
@@ -127,6 +138,8 @@ public class GameContentController {
             building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
             building.save();
             building.transaction().commit();
+        } else {
+            logger.error("No such building exists");
         }
     }
 
@@ -173,7 +186,7 @@ public class GameContentController {
             buildingInfo.setGeneratedId(building.getGeneratedId());
             buildingInfo.setGeneratedName((String) building.get("generated_name"));
             buildingInfo.setGeneratedAmount(building.getGeneratedAmount());
-            List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT bc.*, r.name as resource_name FROM building_costs bc, resources r WHERE building_id = #1#", buildingInfo.getId());
+            List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT bc.*, r.name as resource_name FROM building_costs bc, resources r WHERE building_id = #1# AND bc.resource_id = r.id", buildingInfo.getId());
             List<BuildingCostInfo> buildingCostInfoList = new ArrayList<>();
             for(BuildingCost buildingCost : buildingCosts) {
                 BuildingCostInfo buildingCostInfo = new BuildingCostInfo();

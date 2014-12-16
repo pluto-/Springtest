@@ -15,6 +15,7 @@
         <module>administrator_web</module>
         <module>client</module>
         <module>loginservice</module>
+        <module>auction</module>
     </modules>
 
     <parent>
