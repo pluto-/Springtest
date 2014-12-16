@@ -140,13 +140,18 @@ public class PlayerStateController {
         RestTemplate restTemplate = new RestTemplate();
         ModelAndView modelAndView = new ModelAndView(new RedirectView("/player/buy"));
 
-        ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+        try {
+            ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+            session.setAttribute("message", "Building purchased.");
 
-        session.setAttribute("message", "Building purchased.");
+        } catch(HttpClientErrorException e) {
+            session.setAttribute("message", e.getCause() + " " + e.getLocalizedMessage() + " " + e.getRootCause() + " " +e.getResponseBodyAsString());
+        }
+
         return modelAndView;
     }
 
-    @ExceptionHandler(HttpClientErrorException.class)
+    /*@ExceptionHandler(HttpClientErrorException.class)
     public String handleHttpClientErrorException(HttpClientErrorException ex, HttpSession session) {
 
         try {
@@ -158,5 +163,5 @@ public class PlayerStateController {
 
         return "redirect:/";
 
-    }
+    }*/
 }

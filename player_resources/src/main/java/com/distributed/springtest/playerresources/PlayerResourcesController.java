@@ -3,6 +3,7 @@ package com.distributed.springtest.playerresources;
 import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
+import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
@@ -26,20 +27,20 @@ import java.util.List;
 public class PlayerResourcesController {
 
     @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
-    public Object modifyPlayerResource(@PathVariable("player_id") Integer playerId, @PathVariable("resource_id") Integer resourceId, @PathVariable("amount") Integer amount) {
+    public Object modifyPlayerResource(@RequestBody PlayerResourceModificationWrapper wrapper) {
 
         try {
 
-            updatePlayerResources(playerId);
+            updatePlayerResources(wrapper.getPlayerId());
 
-            List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
+            List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
 
             for(Resource resource : resources) {
-                if(resource.getResourceId() == resourceId) {
-                    if(amount < 0 && amount > resource.getAmount()) {
+                if(resource.getResourceId() == wrapper.getResourceId()) {
+                    if(wrapper.getResourceAmount() < 0 && wrapper.getResourceAmount() > resource.getAmount()) {
                         return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
                     }
-                    resource.setAmount(resource.getAmount() + amount);
+                    resource.setAmount(resource.getAmount() + wrapper.getResourceAmount());
                     resource.save();
                     resource.transaction().commit();
                     break;
@@ -153,7 +154,7 @@ public class PlayerResourcesController {
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        throw new NotEnoughResourcesException();
+        return new ResponseEntity<Object>("Not enough resources.", HttpStatus.CONFLICT);
     }
 
     private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCostInfo> costs) {

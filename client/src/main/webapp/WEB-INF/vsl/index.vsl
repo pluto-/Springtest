@@ -8,3 +8,4 @@
 <br/>
 
 <a href="$link.setRelative("player/state")">State</a><br>
+<a href="$link.setRelative("player/trading")">Trading Post</a><br>
