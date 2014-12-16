@@ -68,6 +68,23 @@ public class PlayerResourcesController {
         }
     }
 
+    @RequestMapping("/{player_id}/resources/{resource_id}")
+    public Object getPlayerResource(@PathVariable("player_id") Integer playerId, @PathVariable("resource_id") Integer resourceId) {
+
+        try {
+
+            updatePlayerResources(playerId);
+
+            Resource resource = Resource.select(Resource.class, "SELECT * FROM resources WHERE player_id = #1# AND resource_id = #2#", playerId, resourceId);
+
+            return resource;
+
+        } catch (SQLException |IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping("/state/{id}")
     public Object getState(@PathVariable("id") Integer playerId) {
 
