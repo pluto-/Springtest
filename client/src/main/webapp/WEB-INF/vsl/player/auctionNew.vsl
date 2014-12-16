@@ -1,0 +1,28 @@
+<legend>New trade</legend>
+<form role="form" class="form" method="post">
+    <div class="form-group">
+        <label for="inputOfferedResource">Offered Resource</label>
+        <select type="text" class="form-control" id="inputOfferedResource" name="offeredResourceId">
+            #foreach($resource in $resources)
+                <option value=$resource.id #if($form.offeredResourceId.equals($resource.id))selected#end>$resource.name</option>
+            #end
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="inputOfferedAmount">Offered Amount: </label>
+        <input type="text" id="inputOfferedAmount" name="offeredAmount" placeholder="Offered Amount" #if($form.offeredAmount) value="$form.offeredAmount"#end>
+    </div>
+    <div class="form-group">
+        <label for="inputDemandedResource">Demanded Resource</label>
+        <select type="text" class="form-control" id="inputDemandedResource" name="demandedResourceId">
+            #foreach($resource in $resources)
+                <option value=$resource.id #if($form.demandedResourceId.equals($resource.id))selected#end>$resource.name</option>
+            #end
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="inputDemandedAmount">Demanded Amount: </label>
+        <input type="text" id="inputDemandedAmount" name="demandedAmount" placeholder="Demanded Amount" #if($form.demandedAmount) value="$form.demandedAmount"#end>
+    </div>
+    <button type="submit" class="btn-default">Save</button>
+</form>

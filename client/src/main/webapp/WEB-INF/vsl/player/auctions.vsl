@@ -1,0 +1,23 @@
+
+<h1>Trading Post</h1>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Created at</th>
+        <th>Offered resource</th>
+        <th>Demanded resource</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($auction in $auctions)
+        <tr>
+            <td>$auction.createdAt</td>
+            <td>$auction.offerResourceName - $auction.offerAmount</td>
+            <td>$auction.demandResourceName - $auction.demandAmount</td>
+            <td><input type="button" onclick="location.href='$link.setRelative("player/trading/buy/$auction.id")'" value="Buy"></td>
+        </tr>
+        #end
+    </tbody>
+</table>
+<input type="button" onclick="location.href='$link.setRelative("player/trading/new")'" value="New">
