@@ -61,3 +61,5 @@
         #end
     </tbody>
 </table>
+<input type="button" onclick="location.href = '$link.setRelative("/")'" value="Back">
+<input type="button" onclick="location.href = '$link.setRelative("/player/state")'" value="Refresh">

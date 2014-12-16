@@ -4,7 +4,6 @@ import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.forms.player.BuildingForm;
 import com.distributed.springtest.client.forms.player.ConstructionForm;
 import com.distributed.springtest.client.forms.player.ResourceForm;
-import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
@@ -145,23 +144,13 @@ public class PlayerStateController {
             session.setAttribute("message", "Building purchased.");
 
         } catch(HttpClientErrorException e) {
-            session.setAttribute("message", e.getCause() + " " + e.getLocalizedMessage() + " " + e.getRootCause() + " " +e.getResponseBodyAsString());
+            if(e.getStatusCode() == HttpStatus.CONFLICT) {
+                session.setAttribute("message", e.getResponseBodyAsString());
+            } else {
+                session.setAttribute("message", e.getMessage());
+            }
         }
 
         return modelAndView;
     }
-
-    /*@ExceptionHandler(HttpClientErrorException.class)
-    public String handleHttpClientErrorException(HttpClientErrorException ex, HttpSession session) {
-
-        try {
-            JSONObject json = new JSONObject(ex.getResponseBodyAsString());
-            session.setAttribute("message", json.get("message"));
-        } catch (JSONException e) {
-            session.setAttribute("message", ex.getMessage());
-        }
-
-        return "redirect:/";
-
-    }*/
 }
