@@ -120,10 +120,30 @@ public class PlayerStateController {
     public Object buy() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/buy");
 
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
+
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfoWrapper[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildingsAndCosts", BuildingInfoWrapper[].class);
 
+        Resource[] resourcesArray = restTemplate.getForObject(playerResourcesURL + "/" + userAuth.getPlayerId() + "/resources", Resource[].class);
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        List<ResourceForm> resources = new ArrayList<>();
+
+        for(Resource resource : resourcesArray) {
+            for(ResourceInfo resourceInfo : resourceInfos) {
+                if(resourceInfo.getId() == resource.getResourceId()) {
+                    ResourceForm form = new ResourceForm();
+                    form.setName(resourceInfo.getName());
+                    form.setAmount(String.format("%.1f",resource.getAmount()));
+                    resources.add(form);
+                    break;
+                }
+            }
+        }
+
         modelAndView.addObject("buildings", Arrays.asList(buildingInfos));
+        modelAndView.addObject("resources", resources);
 
         return modelAndView;
     }

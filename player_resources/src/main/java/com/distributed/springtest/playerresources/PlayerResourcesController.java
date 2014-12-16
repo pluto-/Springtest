@@ -198,6 +198,8 @@ public class PlayerResourcesController {
         Map<Integer, BuildingInfo> buildingInfoMap = getBuildingsInfo();
         long currentTime = System.currentTimeMillis();
         BuildingInfo buildingInfo;
+
+        // Increase resources.
         for(Building building : buildings) {
             long lastUpdated = building.getLastUpdated().getTime();
             long differenceMilli = currentTime - lastUpdated;
@@ -223,6 +225,7 @@ public class PlayerResourcesController {
             building.save();
 
         }
+
 
 
         // Check finished constructions.
@@ -253,6 +256,7 @@ public class PlayerResourcesController {
             }
 
         }
+
 
         new Resource().transaction().commit();
     }

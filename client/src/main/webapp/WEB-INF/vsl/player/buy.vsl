@@ -26,4 +26,23 @@
         #end
     </tbody>
 </table>
+
+<h3>Your resources</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Resource</th>
+        <th>Amount</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($resource in $resources)
+        <tr>
+            <td>$resource.name</td>
+            <td>$resource.amount</td>
+        </tr>
+        #end
+    </tbody>
+</table>
 <input type="button" onclick="location.href = '$link.setRelative("/player/state")'" value="Back">

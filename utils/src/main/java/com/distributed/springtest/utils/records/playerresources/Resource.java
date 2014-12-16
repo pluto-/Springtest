@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jajja.jorm.Jorm;
 import com.jajja.jorm.Record;
 
-@JsonIgnoreProperties({"primaryKeyNullOrChanged", "primaryKeyNull", "stale", "changed"})
-@Jorm(database="player_resources", schema="public", table="resources", primaryKey="player_id")
+import com.jajja.jorm.Jorm;
+import com.jajja.jorm.Record;
+
+@Jorm(database="player_resources", schema="public", table="resources", primaryKey="id")
 public class Resource extends Record {
     public Integer getPlayerId() {
         return get("player_id", Integer.class);
@@ -29,5 +31,13 @@ public class Resource extends Record {
 
     public void setAmount(Double amount) {
         set("amount", amount);
+    }
+
+    public Integer getId() {
+        return get("id", Integer.class);
+    }
+
+    public void setId(Integer id) {
+        set("id", id);
     }
 }

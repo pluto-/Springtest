@@ -1,11 +1,13 @@
 <h1>Admin</h1>
 <br/>
-
 <a href="$link.setRelative("admin/buildings")">Buildings</a><br>
 <a href="$link.setRelative("admin/resources")">Resources</a>
 
 <h1>Player</h1>
 <br/>
-
 <a href="$link.setRelative("player/state")">State</a><br>
 <a href="$link.setRelative("player/trading")">Trading Post</a><br>
+
+<h1>Register</h1>
+<br/>
+<a href="$link.setRelative("register/create")">Create Player</a><br>

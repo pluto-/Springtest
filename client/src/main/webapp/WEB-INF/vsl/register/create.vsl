@@ -1,0 +1,18 @@
+<legend>Create User</legend>
+<form role="form" class="form" method="post">
+    <div class="form-group">
+        <label for="inputUsername">Username: </label>
+        <input type="text" id="inputUsername" name="username" placeholder="Username">
+    </div>
+    <div class="form-group">
+        <label for="inputPassword">Password: </label>
+        <input type="password" id="inputPassword" name="password" placeholder="Password">
+    </div>
+    <div class="form-group">
+        <input type="radio" name="role" value="USER" checked="checked"/>User<br>
+        <input type="radio" name="role" value="ADMIN"/>Admin
+        <input type="password" id="inputAdminPassword" name="adminPassword" placeholder="Admin Password">
+    </div>
+    <button type="submit" class="btn-default">Save</button>
+</form>
+
