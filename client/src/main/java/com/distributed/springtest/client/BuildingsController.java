@@ -21,7 +21,7 @@ import java.util.*;
  * Created by Patrik on 2014-12-09.
  */
 @Controller
-@RequestMapping("/buildings")
+@RequestMapping("/admin/buildings")
 public class BuildingsController {
 
     @Value("${hosts.gamecontent}")
@@ -29,7 +29,7 @@ public class BuildingsController {
 
     @RequestMapping("")
     public Object buildings() throws SQLException {
-        ModelAndView modelAndView = new ModelAndView("buildings");
+        ModelAndView modelAndView = new ModelAndView("admin/buildings");
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfo[] buildings = restTemplate.getForObject(gamecontentURL + "/buildings", BuildingInfo[].class);
         modelAndView.addObject("buildings", buildings);
@@ -38,7 +38,7 @@ public class BuildingsController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getBuilding(@PathVariable Integer id) throws SQLException {
-        ModelAndView modelAndView = new ModelAndView("editBuilding");
+        ModelAndView modelAndView = new ModelAndView("admin/editBuilding");
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfo building = restTemplate.getForObject(gamecontentURL + "/buildings/" + id, BuildingInfo.class);
         BuildingCostInfo[] buildingCosts = restTemplate.getForObject(gamecontentURL + "/buildings/" + id + "/costs", BuildingCostInfo[].class);
@@ -71,7 +71,7 @@ public class BuildingsController {
         building.setGeneratedAmount(form.getGeneratedAmount());
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.put(gamecontentURL + "/buildings/modify", building);
-        return new RedirectView("/buildings", true);
+        return new RedirectView("/admin/buildings", true);
     }
 
     @RequestMapping(value = "/{id}/addCost", method = RequestMethod.POST)
@@ -86,7 +86,7 @@ public class BuildingsController {
         System.out.println(cost.getId() + ":" + cost.getBuildingId() + "-" + cost.getResourceId() + "-" + cost.getAmount());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(gamecontentURL + "/buildings/" + id + "/costs/add", cost, String.class);
         System.out.println(responseEntity.getStatusCode() + ": " + responseEntity.getBody());
-        return new RedirectView("/buildings/" + id, true);
+        return new RedirectView("/admin/buildings/" + id, true);
     }
 
     @RequestMapping(value = "/{id}/modifyCost/{costId}", method = RequestMethod.POST)
@@ -99,14 +99,14 @@ public class BuildingsController {
         System.out.println(cost.getId() + " - " + cost.getBuildingId() + " : " + cost.getResourceId() + " - " + cost.getAmount());
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.put(gamecontentURL + "/buildings/" + id + "/costs/" + costId + "/modify", cost);
-        return new RedirectView("/buildings/" + id, true);
+        return new RedirectView("/admin/buildings/" + id, true);
     }
 
     @RequestMapping(value = "/{id}/removeCost/{costId}")
     public Object removeCost(@PathVariable Integer id, @PathVariable Integer costId) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.delete(gamecontentURL + "/buildings/" + id + "/costs/" + costId + "/delete");
-        return new RedirectView("/buildings/" + id, true);
+        return new RedirectView("/admin/buildings/" + id, true);
     }
 
 
