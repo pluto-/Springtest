@@ -14,6 +14,7 @@ import com.distributed.springtest.utils.records.playerresources.Resource;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
+import com.sun.deploy.net.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -119,7 +120,7 @@ public class PlayerStateController {
         return modelAndView;
     }
     @RequestMapping("/buy/{id}")
-    public Object buy(@PathVariable Integer id, HttpSession session) throws SQLException {
+    public Object buy(@PathVariable Integer id) throws SQLException {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
@@ -135,9 +136,12 @@ public class PlayerStateController {
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
-    public String handleNotEnoughResourcesException(HttpClientErrorException ex, HttpSession session) {
+    public String handleHttpClientErrorException(HttpClientErrorException ex, HttpSession session) {
 
-        session.setAttribute("message", ex.getMessage());
+
+
+        session.setAttribute("message", ex.getResponseBodyAsString());
+        //ex.printStackTrace();
         return "redirect:/";
 
         /*System.err.println("HANDLING");
