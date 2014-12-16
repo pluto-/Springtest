@@ -15,10 +15,10 @@
         #foreach($building in $buildings)
         <tr>
             <td>$building.buildingInfo.name</td>
-            <td>$idToName.get($building.buildingInfo.generated_id)</td>
-            <td>$building.buildingInfo.generated_amount</td>
+            <td>$building.buildingInfo.generatedName</td>
+            <td>$building.buildingInfo.generatedAmount</td>
             <td>#foreach($cost in $building.buildingCosts)
-                $idToName.get($cost.resource_id):$cost.amount
+                $cost.resourceName:$cost.amount
             #end</td>
             <td>$building.buildingInfo.buildtime</td>
             <td><button class="button" onclick="location.href = '$link.getURI()/$building.buildingInfo.id'">Buy</button></td>

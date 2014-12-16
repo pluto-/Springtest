@@ -25,6 +25,49 @@ import java.util.List;
 @RestController
 public class PlayerResourcesController {
 
+    @RequestMapping("/{player_id}/resources/modify/{resource_id}/{amount}")
+    public Object modifyPlayerResource(@PathVariable("player_id") Integer playerId, @PathVariable("resource_id") Integer resourceId, @PathVariable("amount") Integer amount) {
+
+        try {
+
+            updatePlayerResources(playerId);
+
+            List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
+
+            for(Resource resource : resources) {
+                if(resource.getResourceId() == resourceId) {
+                    resource.setAmount(resource.getAmount() + amount);
+                    resource.save();
+                    resource.transaction().commit();
+                    break;
+                }
+            }
+
+            return new ResponseEntity<Object>(HttpStatus.OK);
+
+        } catch (SQLException |IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping("/{id}/resources")
+    public Object getPlayerResources(@PathVariable("id") Integer playerId) {
+
+        try {
+
+            updatePlayerResources(playerId);
+
+            List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
+
+            return resources;
+
+        } catch (SQLException |IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping("/state/{id}")
     public Object getState(@PathVariable("id") Integer playerId) {
 
@@ -38,9 +81,6 @@ public class PlayerResourcesController {
 
             PlayerStateWrapper wrapper = new PlayerStateWrapper(resources, buildings, constructions);
 
-
-
-            System.err.println("RETURNING!");
             return wrapper;
 
         } catch (SQLException |IOException e) {
@@ -161,12 +201,23 @@ public class PlayerResourcesController {
                         }
 
                         // Move to Buildings.
+                        boolean buildingFound = false;
                         for(Building building : buildings) {
                             if(building.getBuildingId().equals(construction.getBuildingId())) {
                                 building.setAmount(building.getAmount() + 1);
+                                buildingFound = true;
                                 break;
                             }
                         }
+                        if(!buildingFound) {
+                            Building building = new Building();
+                            building.setBuildingId(buildingInfo.getId());
+                            building.setPlayerId(playerId);
+                            building.setAmount(1);
+                            building.setLastUpdated(new Timestamp(currentTime));
+                            buildings.add(building);
+                        }
+
                         Construction.deleteById(Construction.class, construction.getId());
                     }
                     break;

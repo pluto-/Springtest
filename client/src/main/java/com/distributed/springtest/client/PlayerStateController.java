@@ -2,7 +2,6 @@ package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.forms.player.BuildingForm;
-import com.distributed.springtest.client.forms.player.BuyBuildingForm;
 import com.distributed.springtest.client.forms.player.ConstructionForm;
 import com.distributed.springtest.client.forms.player.ResourceForm;
 import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
@@ -15,6 +14,8 @@ import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.sun.deploy.net.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -67,29 +69,44 @@ public class PlayerStateController {
         List<ResourceForm> resources = new ArrayList<>();
         List<ConstructionForm> constructions = new ArrayList<>();
 
+        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        BuildingInfo[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildings", BuildingInfo[].class);
+
         for(Resource resource : wrapper.getResources()) {
-            ResourceInfo resourceInfo = restTemplate.getForObject(gamecontentURL + "/resources/" + resource.getResourceId(), ResourceInfo.class);
-            ResourceForm form = new ResourceForm();
-            form.setName(resourceInfo.getName());
-            form.setAmount(resource.getAmount());
-            resources.add(form);
+            for(ResourceInfo resourceInfo : resourceInfos) {
+                if(resourceInfo.getId() == resource.getResourceId()) {
+                    ResourceForm form = new ResourceForm();
+                    form.setName(resourceInfo.getName());
+                    form.setAmount(String.format("%.1f",resource.getAmount()));
+                    resources.add(form);
+                    break;
+                }
+            }
         }
         for(Building building : wrapper.getBuildings()) {
-            BuildingInfo buildingInfo = restTemplate.getForObject(gamecontentURL + "/buildings/" + building.getBuildingId(), BuildingInfo.class);
-            BuildingForm form = new BuildingForm();
-            form.setName(buildingInfo.getName() + " x" + building.getAmount());
-            ResourceInfo resourceInfo = restTemplate.getForObject(gamecontentURL + "/resources/" + buildingInfo.getGeneratedId(), ResourceInfo.class);
-            form.setGenerates(resourceInfo.getName());
-            form.setGeneratedAmount(buildingInfo.getGeneratedAmount() + " x " + building.getAmount() + " (" + (buildingInfo.getGeneratedAmount() * building.getAmount()) + ")");
-            buildings.add(form);
+            for(BuildingInfo buildingInfo : buildingInfos) {
+                if(buildingInfo.getId() == building.getBuildingId()) {
+                    BuildingForm form = new BuildingForm();
+                    form.setName(buildingInfo.getName() + " x" + building.getAmount());
+                    form.setGenerates(buildingInfo.getGeneratedName());
+                    form.setGeneratedAmount(buildingInfo.getGeneratedAmount() + " x " + building.getAmount() + " (" + (buildingInfo.getGeneratedAmount() * building.getAmount()) + ")");
+                    buildings.add(form);
+                    break;
+                }
+            }
         }
         for(Construction construction : wrapper.getConstructions()) {
-            BuildingInfo buildingInfo = restTemplate.getForObject(gamecontentURL + "/buildings/" + construction.getBuildingId(), BuildingInfo.class);
-            ConstructionForm form = new ConstructionForm();
-            form.setName(buildingInfo.getName());
-            form.setStarted(construction.getStartedAt());
-            form.setFinishes(new Timestamp(construction.getStartedAt().getTime() + buildingInfo.getBuildtime() * 1000));
-            constructions.add(form);
+            for(BuildingInfo buildingInfo : buildingInfos) {
+                if(buildingInfo.getId() == construction.getBuildingId()) {
+                    ConstructionForm form = new ConstructionForm();
+                    form.setName(buildingInfo.getName());
+                    form.setStarted(construction.getStartedAt());
+                    form.setFinishes(new Timestamp(construction.getStartedAt().getTime() + buildingInfo.getBuildtime() * 1000));
+                    constructions.add(form);
+
+                    break;
+                }
+            }
         }
 
 
@@ -104,23 +121,16 @@ public class PlayerStateController {
     public Object buy() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/buy");
 
-        List<BuyBuildingForm> buildings = new ArrayList<>();
-
         RestTemplate restTemplate = new RestTemplate();
         BuildingInfoWrapper[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildingsAndCosts", BuildingInfoWrapper[].class);
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
-        Map<Integer, String> idToName = new HashMap<>();
-        for(ResourceInfo resourceInfo : resourceInfos) {
-            idToName.put(resourceInfo.getId(), resourceInfo.getName());
-        }
 
         modelAndView.addObject("buildings", Arrays.asList(buildingInfos));
-        modelAndView.addObject("idToName", idToName);
 
         return modelAndView;
     }
+
     @RequestMapping("/buy/{id}")
-    public Object buy(@PathVariable Integer id) throws SQLException {
+    public Object buy(@PathVariable Integer id, HttpSession session) throws SQLException {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
@@ -132,24 +142,21 @@ public class PlayerStateController {
 
         ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
 
+        session.setAttribute("message", "Building purchased.");
         return modelAndView;
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
     public String handleHttpClientErrorException(HttpClientErrorException ex, HttpSession session) {
 
+        try {
+            JSONObject json = new JSONObject(ex.getResponseBodyAsString());
+            session.setAttribute("message", json.get("message"));
+        } catch (JSONException e) {
+            session.setAttribute("message", ex.getMessage());
+        }
 
-
-        session.setAttribute("message", ex.getResponseBodyAsString());
-        //ex.printStackTrace();
         return "redirect:/";
-
-        /*System.err.println("HANDLING");
-        ModelAndView model = new ModelAndView("redirect:/");
-        redirectAttributes.addFlashAttribute("message", ex.getMessage());
-        //model.addObject("message", ex.getMessage());
-
-        return model;*/
 
     }
 }
