@@ -1,6 +1,5 @@
 package com.distributed.springtest.playerresources;
 
-import com.distributed.springtest.utils.exceptions.NotEnoughResourcesException;
 import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
@@ -111,7 +110,7 @@ public class PlayerResourcesController {
     }
 
     @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
-    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) throws NotEnoughResourcesException {
+    public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) {
         List<BuildingCostInfo> costs = null;
         List<Resource> playerResources = null;
         try {
