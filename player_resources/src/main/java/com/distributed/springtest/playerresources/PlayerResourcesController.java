@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jonas on 2014-12-05.
@@ -181,85 +183,89 @@ public class PlayerResourcesController {
 
     protected static void updatePlayerResources(int playerId) throws SQLException, IOException {
         List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
+
+        Map<Integer, Resource> resourceMap = new HashMap<>();
+        for(Resource resource : resources) {
+            resourceMap.put(resource.getResourceId(), resource);
+        }
         List<Building> buildings = Building.selectAll(Building.class, "SELECT * FROM buildings WHERE player_id = #1#", playerId);
-        List<BuildingInfo> buildingsInfo = getBuildingsInfo();
+
+        Map<Integer, Building> buildingMap = new HashMap<>();
+        for(Building building : buildings) {
+            buildingMap.put(building.getBuildingId(), building);
+        }
+
+        Map<Integer, BuildingInfo> buildingInfoMap = getBuildingsInfo();
         long currentTime = System.currentTimeMillis();
+        BuildingInfo buildingInfo;
         for(Building building : buildings) {
             long lastUpdated = building.getLastUpdated().getTime();
             long differenceMilli = currentTime - lastUpdated;
             long differenceSec = Math.round(differenceMilli / 1000);
-            for(BuildingInfo buildingInfo : buildingsInfo) {
-                if(buildingInfo.getId().equals(building.getBuildingId())) {
-                    float amountPerSecond = buildingInfo.getGeneratedAmount();
-                    int nrOfBuildings = building.getAmount();
-                    for(Resource resource : resources) {
-                        if(resource.getResourceId().equals(buildingInfo.getGeneratedId())) {
 
-                            building.setLastUpdated(new Timestamp(currentTime));
-                            resource.setAmount(resource.getAmount() + (nrOfBuildings * amountPerSecond * differenceSec));
-                        }
+            buildingInfo = buildingInfoMap.get(building.getBuildingId());
 
-                    }
-                }
+            float amountPerSecond = buildingInfo.getGeneratedAmount();
+            int nrOfBuildings = building.getAmount();
+
+            Resource resource = resourceMap.get(buildingInfo.getGeneratedId());
+            if(resource == null) {
+                resource = new Resource();
+                resource.setPlayerId(playerId);
+                resource.setResourceId(buildingInfo.getGeneratedId());
+                resource.setAmount(0.0);
+                resourceMap.put(resource.getResourceId(), resource);
             }
+            resource.setAmount(resource.getAmount() + (nrOfBuildings * amountPerSecond * differenceSec));
+            resource.save();
+
+            building.setLastUpdated(new Timestamp(currentTime));
+            building.save();
+
         }
+
 
         // Check finished constructions.
         List<Construction> constructions = Construction.selectAll(Construction.class, "SELECT * FROM construction WHERE player_id = #1#", playerId);
         for(Construction construction : constructions) {
-            for(BuildingInfo buildingInfo : buildingsInfo) {
-                if(buildingInfo.getId().equals(construction.getBuildingId())) {
-                    if(((currentTime - construction.getStartedAt().getTime()) / 1000) >= buildingInfo.getBuildtime()) {
-                        // Increase the resource.
-                        for(Resource resource : resources) {
-                            if(resource.getResourceId().equals(buildingInfo.getGeneratedId())) {
-                                long timeFinishedConstruction = construction.getStartedAt().getTime() + buildingInfo.getBuildtime();
-                                double generatedAmount = ((currentTime - timeFinishedConstruction)/1000) * buildingInfo.getGeneratedAmount();
-                                resource.setAmount(resource.getAmount() + generatedAmount);
-                            }
-                            break;
-                        }
+            buildingInfo = buildingInfoMap.get(construction.getBuildingId());
+            if(((currentTime - construction.getStartedAt().getTime()) / 1000) >= buildingInfo.getBuildtime()) {
+                // Increase the resource.
+                Resource resource = resourceMap.get(buildingInfo.getGeneratedId());
+                long timeFinishedConstruction = construction.getStartedAt().getTime() + buildingInfo.getBuildtime();
+                double generatedAmount = ((currentTime - timeFinishedConstruction)/1000) * buildingInfo.getGeneratedAmount();
+                resource.setAmount(resource.getAmount() + generatedAmount);
+                resource.save();
 
-                        // Move to Buildings.
-                        boolean buildingFound = false;
-                        for(Building building : buildings) {
-                            if(building.getBuildingId().equals(construction.getBuildingId())) {
-                                building.setAmount(building.getAmount() + 1);
-                                buildingFound = true;
-                                break;
-                            }
-                        }
-                        if(!buildingFound) {
-                            Building building = new Building();
-                            building.setBuildingId(buildingInfo.getId());
-                            building.setPlayerId(playerId);
-                            building.setAmount(1);
-                            building.setLastUpdated(new Timestamp(currentTime));
-                            buildings.add(building);
-                        }
-
-                        Construction.deleteById(Construction.class, construction.getId());
-                    }
-                    break;
+                // Move to Buildings.
+                Building building = buildingMap.get(construction.getBuildingId());
+                if(building == null) {
+                    building = new Building();
+                    building.setBuildingId(buildingInfo.getId());
+                    building.setPlayerId(playerId);
+                    building.setAmount(0);
+                    building.setLastUpdated(new Timestamp(currentTime));
                 }
+                building.setAmount(building.getAmount() + 1);
+                building.save();
+
+                Construction.deleteById(Construction.class, construction.getId());
             }
+
         }
 
-        // Store new data in database.
-        for(Resource resource : resources) {
-            resource.save();
-        }
-        for(Building building : buildings) {
-            building.save();
-        }
         new Resource().transaction().commit();
     }
 
-    private static List<BuildingInfo> getBuildingsInfo() throws IOException {
+    private static Map<Integer, BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/buildings";
         BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
-        return Arrays.asList(buildingInfos);
+        Map<Integer, BuildingInfo> buildingInfoMap = new HashMap<>();
+        for(BuildingInfo buildingInfo : buildingInfos) {
+            buildingInfoMap.put(buildingInfo.getId(), buildingInfo);
+        }
+        return buildingInfoMap;
     }
 
     private static List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
