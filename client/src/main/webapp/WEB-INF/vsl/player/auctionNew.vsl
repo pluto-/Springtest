@@ -3,8 +3,8 @@
     <div class="form-group">
         <label for="inputOfferedResource">Offered Resource</label>
         <select type="text" class="form-control" id="inputOfferedResource" name="offeredResourceId">
-            #foreach($resource in $resources)
-                <option value=$resource.id #if($form.offeredResourceId.equals($resource.id))selected#end>$resource.name</option>
+            #foreach($resourceId in $resources.keySet())
+                <option value=$resourceId #if($form.offeredResourceId.equals($resourceId))selected#end>$resources.get($resourceId)</option>
             #end
         </select>
     </div>
@@ -15,8 +15,8 @@
     <div class="form-group">
         <label for="inputDemandedResource">Demanded Resource</label>
         <select type="text" class="form-control" id="inputDemandedResource" name="demandedResourceId">
-            #foreach($resource in $resources)
-                <option value=$resource.id #if($form.demandedResourceId.equals($resource.id))selected#end>$resource.name</option>
+            #foreach($resourceId in $resources.keySet())
+                <option value=$resourceId #if($form.demandedResourceId.equals($resourceId))selected#end>$resources.get($resourceId)</option>
             #end
         </select>
     </div>
@@ -24,5 +24,23 @@
         <label for="inputDemandedAmount">Demanded Amount: </label>
         <input type="text" id="inputDemandedAmount" name="demandedAmount" placeholder="Demanded Amount" #if($form.demandedAmount) value="$form.demandedAmount"#end>
     </div>
+    <input type="button" onclick="location.href='$link.setRelative("player/trading/")'" value="Back">
     <button type="submit" class="btn-default">Save</button>
 </form>
+<h3>Your resources</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Resource</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($resource in $playerResources)
+        <tr>
+            <td>$resources.get($resource.resource_id)</td>
+            <td>$resource.amount</td>
+        </tr>
+        #end
+    </tbody>
+</table>
