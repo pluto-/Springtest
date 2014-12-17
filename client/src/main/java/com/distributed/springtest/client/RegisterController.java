@@ -13,6 +13,7 @@ import com.distributed.springtest.utils.records.playerresources.Construction;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
+import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -42,6 +47,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/register")
 public class RegisterController {
+
+    @Value("${player.create.beginningresource.id}")
+    private Integer beginningResourceId;
+
+    @Value("${player.create.beginningresource.amount}")
+    private Double beginningResourceAmount;
 
     @Value("${hosts.playerresources}")
     private String playerResourcesURL;
@@ -62,7 +73,12 @@ public class RegisterController {
     }
 
     @RequestMapping(value="/create", method = RequestMethod.POST)
-    public Object createPost(@ModelAttribute @Valid CreateUserForm form, HttpSession session) throws SQLException {
+    public Object createPost(@ModelAttribute @Valid CreateUserForm form, HttpSession session) throws SQLException, UnsupportedEncodingException, NoSuchAlgorithmException {
+
+        if(!form.getPassword().matches("^[a-zA-Z0-9_]*$") || !form.getUsername().matches("^[a-zA-Z0-9_]*$")) {
+            session.setAttribute("message", "Only characters a - z, A - Z, 0-9 and _ are allowed.");
+            return new RedirectView("/");
+        }
 
         UserAuthentication check = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username = #1#", form.getUsername());
         if(check != null) {
@@ -70,7 +86,13 @@ public class RegisterController {
         } else {
             UserAuthentication userAuthentication = new UserAuthentication();
             userAuthentication.setUsername(form.getUsername());
-            userAuthentication.setPassword(form.getPassword());
+
+            byte[] bytesOfMessage = form.getPassword().getBytes("UTF-8");
+
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] passwordHashed = md.digest(bytesOfMessage);
+
+            userAuthentication.setPassword(new BigInteger(1, passwordHashed).toString(16));
             userAuthentication.setEnabled(true);
             userAuthentication.save();
 
@@ -88,11 +110,27 @@ public class RegisterController {
                 userAuthorization.setRole("ROLE_USER");
             }
 
-            userAuthorization.save();
+            PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
+            wrapper.setResourceId(beginningResourceId);
+            wrapper.setResourceAmount(beginningResourceAmount);
+            wrapper.setPlayerId(userAuthentication.getPlayerId());
 
-            userAuthentication.transaction().commit();
-            session.setAttribute("message", "Player created.");
+            RestTemplate restTemplate = new RestTemplate();
+
+            try{
+                restTemplate.put(playerResourcesURL + "/resources/modify", wrapper, String.class);
+
+                userAuthorization.save();
+                userAuthentication.transaction().commit();
+                session.setAttribute("message", "Player created.");
+
+            } catch(HttpClientErrorException e) {
+                session.setAttribute("message", "ERROR: " + e.getResponseBodyAsString());
+            }
+
         }
+
+
 
         return new RedirectView("/");
     }

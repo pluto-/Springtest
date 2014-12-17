@@ -6,6 +6,7 @@ import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapp
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 
 import java.io.IOException;
+import java.net.URI;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -36,17 +38,26 @@ public class PlayerResourcesController {
 
             List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
 
+            Map<Integer, Resource> resourceMap = new HashMap<>();
             for(Resource resource : resources) {
-                if(resource.getResourceId() == wrapper.getResourceId()) {
-                    if(wrapper.getResourceAmount() < 0 && wrapper.getResourceAmount() > resource.getAmount()) {
-                        return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
-                    }
-                    resource.setAmount(resource.getAmount() + wrapper.getResourceAmount());
-                    resource.save();
-                    resource.transaction().commit();
-                    break;
-                }
+                resourceMap.put(resource.getResourceId(), resource);
             }
+
+            Resource resource = resourceMap.get(wrapper.getResourceId());
+            if(resource == null) {
+                resource = new Resource();
+                resource.setPlayerId(wrapper.getPlayerId());
+                resource.setResourceId(wrapper.getResourceId());
+                resource.setAmount(0.0);
+            }
+
+            if((resource.getAmount() + wrapper.getResourceAmount()) < 0) {
+                return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
+            }
+
+            resource.setAmount(resource.getAmount() + wrapper.getResourceAmount());
+            resource.save();
+            resource.transaction().commit();
 
             return new ResponseEntity<Object>(HttpStatus.OK);
 
@@ -235,6 +246,13 @@ public class PlayerResourcesController {
             if(((currentTime - construction.getStartedAt().getTime()) / 1000) >= buildingInfo.getBuildtime()) {
                 // Increase the resource.
                 Resource resource = resourceMap.get(buildingInfo.getGeneratedId());
+                if(resource == null) {
+                    resource = new Resource();
+                    resource.setPlayerId(playerId);
+                    resource.setResourceId(buildingInfo.getGeneratedId());
+                    resource.setAmount(0.0);
+                    resourceMap.put(resource.getResourceId(), resource);
+                }
                 long timeFinishedConstruction = construction.getStartedAt().getTime() + buildingInfo.getBuildtime();
                 double generatedAmount = ((currentTime - timeFinishedConstruction)/1000) * buildingInfo.getGeneratedAmount();
                 resource.setAmount(resource.getAmount() + generatedAmount);
@@ -248,6 +266,7 @@ public class PlayerResourcesController {
                     building.setPlayerId(playerId);
                     building.setAmount(0);
                     building.setLastUpdated(new Timestamp(currentTime));
+                    buildingMap.put(building.getBuildingId(), building);
                 }
                 building.setAmount(building.getAmount() + 1);
                 building.save();
@@ -256,7 +275,6 @@ public class PlayerResourcesController {
             }
 
         }
-
 
         new Resource().transaction().commit();
     }
@@ -275,7 +293,6 @@ public class PlayerResourcesController {
     private static List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String uri = PropertiesLoader.getAddressAndPort() + "/buildings/"+ buildingId+"/costs";
-        System.err.println(uri);
         BuildingCostInfo[] buildingCosts = restTemplate.getForObject(uri, BuildingCostInfo[].class);
         return Arrays.asList(buildingCosts);
     }
