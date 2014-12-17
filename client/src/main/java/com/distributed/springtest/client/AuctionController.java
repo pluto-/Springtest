@@ -3,6 +3,7 @@ package com.distributed.springtest.client;
 import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.forms.player.AuctionForm;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
+import com.distributed.springtest.utils.records.playerresources.Resource;
 import com.distributed.springtest.utils.wrappers.AuctionWrapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,9 @@ import javax.resource.spi.work.SecurityContext;
 import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Patrik on 2014-12-16.
@@ -35,6 +38,9 @@ public class AuctionController {
     private String auctionURL;
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
+    @Value("${hosts.playerresources}")
+    private String playerResourcesURL;
+
 
     @RequestMapping("")
     public Object getAuctions() {
@@ -55,11 +61,19 @@ public class AuctionController {
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
-    public Object newAuction() {
+    public Object newAuction() throws SQLException {
         RestTemplate restTemplate = new RestTemplate();
-        List<ResourceInfo> resources = Arrays.asList(restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class));
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
+        List<ResourceInfo> resourceInfos = Arrays.asList(restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class));
+        Map<Integer, String> resources = new HashMap<>();
+        for(ResourceInfo resource : resourceInfos) {
+            resources.put(resource.getId(), resource.getName());
+        }
+        List<Resource> playerResources = Arrays.asList(restTemplate.getForObject(playerResourcesURL + "/" + userAuth.getPlayerId() +  "/resources", Resource[].class));
         ModelAndView modelAndView = new ModelAndView("player/auctionNew");
         modelAndView.addObject("resources", resources);
+        modelAndView.addObject("playerResources", playerResources);
         return modelAndView;
     }
 

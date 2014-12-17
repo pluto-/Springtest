@@ -1,5 +1,6 @@
 package com.distributed.springtest.client;
 
+import com.jajja.jorm.Database;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -28,5 +29,11 @@ public class Interceptor extends HandlerInterceptorAdapter{
                 modelAndView.setViewName(template != null ? template : "layout");
             }
         }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,  Object handler, Exception ex) throws Exception {
+        super.afterCompletion(request, response,  handler,  ex);
+        Database.close();
     }
 }
