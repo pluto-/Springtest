@@ -73,7 +73,7 @@ public class PlayerStateController {
 
         for(Resource resource : wrapper.getResources()) {
             for(ResourceInfo resourceInfo : resourceInfos) {
-                if(resourceInfo.getId() == resource.getResourceId()) {
+                if(resourceInfo.getId().equals(resource.getResourceId())) {
                     ResourceForm form = new ResourceForm();
                     form.setName(resourceInfo.getName());
                     form.setAmount(String.format("%.1f",resource.getAmount()));
@@ -84,7 +84,7 @@ public class PlayerStateController {
         }
         for(Building building : wrapper.getBuildings()) {
             for(BuildingInfo buildingInfo : buildingInfos) {
-                if(buildingInfo.getId() == building.getBuildingId()) {
+                if(buildingInfo.getId().equals(building.getBuildingId())) {
                     BuildingForm form = new BuildingForm();
                     form.setName(buildingInfo.getName() + " x" + building.getAmount());
                     form.setGenerates(buildingInfo.getGeneratedName());
@@ -96,7 +96,7 @@ public class PlayerStateController {
         }
         for(Construction construction : wrapper.getConstructions()) {
             for(BuildingInfo buildingInfo : buildingInfos) {
-                if(buildingInfo.getId() == construction.getBuildingId()) {
+                if(buildingInfo.getId().equals(construction.getBuildingId())) {
                     ConstructionForm form = new ConstructionForm();
                     form.setName(buildingInfo.getName());
                     form.setStarted(construction.getStartedAt());
@@ -132,7 +132,7 @@ public class PlayerStateController {
 
         for(Resource resource : resourcesArray) {
             for(ResourceInfo resourceInfo : resourceInfos) {
-                if(resourceInfo.getId() == resource.getResourceId()) {
+                if(resourceInfo.getId().equals(resource.getResourceId())) {
                     ResourceForm form = new ResourceForm();
                     form.setName(resourceInfo.getName());
                     form.setAmount(String.format("%.1f",resource.getAmount()));
