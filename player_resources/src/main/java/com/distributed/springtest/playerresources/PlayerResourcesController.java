@@ -1,11 +1,13 @@
 package com.distributed.springtest.playerresources;
 
 import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
+import com.distributed.springtest.utils.security.DigestHandler;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,14 @@ import java.util.Map;
  */
 @RestController
 public class PlayerResourcesController {
+
+    private DigestHandler digestHandler;
+
+    @Autowired
+    public PlayerResourcesController(DigestHandler digestHandler) {
+        System.err.println("PlayerResources Constructor!");
+        this.digestHandler = digestHandler;
+    }
 
     @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
     public Object modifyPlayerResource(@RequestBody PlayerResourceModificationWrapper wrapper) {
