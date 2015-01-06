@@ -2,22 +2,22 @@ package com.distributed.springtest.playerresources;
 
 import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.security.DigestHandler;
+import com.distributed.springtest.utils.security.DigestRest;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -31,12 +31,33 @@ import java.util.Map;
 @RestController
 public class PlayerResourcesController {
 
-    private DigestHandler digestHandler;
+    static private String gameContentURL;
+    static protected DigestHandler digestHandler;
+    static private String username;
+    static private String hashedPassword;
 
-    @Autowired
-    public PlayerResourcesController(DigestHandler digestHandler) {
-        System.err.println("PlayerResources Constructor!");
-        this.digestHandler = digestHandler;
+    @Value("${hosts.gamecontent}")
+    public void setGameContentURLName(String gameContentURL) {
+        PlayerResourcesController.gameContentURL = gameContentURL;
+    }
+
+    @Value("${digesthandler.path}")
+    public void setDigestHandler(String filePath) {
+        try {
+            PlayerResourcesController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Value("${username}")
+    public void setUsername(String username) {
+        PlayerResourcesController.username = username;
+    }
+
+    @Value("${password}")
+    public void setHashedPassword(String password) {
+        PlayerResourcesController.hashedPassword = password;
     }
 
     @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
@@ -79,7 +100,6 @@ public class PlayerResourcesController {
 
     @RequestMapping("/{id}/resources")
     public Object getPlayerResources(@PathVariable("id") Integer playerId) {
-
         try {
 
             updatePlayerResources(playerId);
@@ -92,6 +112,15 @@ public class PlayerResourcesController {
             e.printStackTrace();
             return new ResponseEntity<Object>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @RequestMapping("/counter")
+    public Object getPlayerResources(HttpServletRequest request) {
+        int counter = digestHandler.getCounter(request.getHeader("username"));
+        if(counter == -1) {
+            return new ResponseEntity<Object>("Username does not exist.", HttpStatus.UNAUTHORIZED);
+        }
+        return counter;
     }
 
     @RequestMapping("/{player_id}/resources/{resource_id}")
@@ -179,7 +208,7 @@ public class PlayerResourcesController {
         return new ResponseEntity<Object>("Not enough resources.", HttpStatus.CONFLICT);
     }
 
-    private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCostInfo> costs) {
+    static private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCostInfo> costs) {
 
         boolean isEnough;
         for(BuildingCostInfo cost : costs) {
@@ -202,7 +231,7 @@ public class PlayerResourcesController {
         return true;
     }
 
-    protected static void updatePlayerResources(int playerId) throws SQLException, IOException {
+    static protected void updatePlayerResources(int playerId) throws SQLException, IOException {
         List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
 
         Map<Integer, Resource> resourceMap = new HashMap<>();
@@ -289,21 +318,28 @@ public class PlayerResourcesController {
         new Resource().transaction().commit();
     }
 
-    private static Map<Integer, BuildingInfo> getBuildingsInfo() throws IOException {
+    static private Map<Integer, BuildingInfo> getBuildingsInfo() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getAddressAndPort() + "/buildings";
-        BuildingInfo[] buildingInfos = restTemplate.getForObject(uri, BuildingInfo[].class);
+        String uri = gameContentURL + "/buildings";
+
+        HttpEntity<String> parameters = DigestRest.getHeadersEntity(gameContentURL, username, hashedPassword);
+
+        ResponseEntity<BuildingInfo[]> buildingInfos = restTemplate.exchange(uri, HttpMethod.GET, parameters, BuildingInfo[].class);
+
         Map<Integer, BuildingInfo> buildingInfoMap = new HashMap<>();
-        for(BuildingInfo buildingInfo : buildingInfos) {
+        for(BuildingInfo buildingInfo : buildingInfos.getBody()) {
             buildingInfoMap.put(buildingInfo.getId(), buildingInfo);
         }
         return buildingInfoMap;
     }
 
-    private static List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
+    static private List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String uri = PropertiesLoader.getAddressAndPort() + "/buildings/"+ buildingId+"/costs";
-        BuildingCostInfo[] buildingCosts = restTemplate.getForObject(uri, BuildingCostInfo[].class);
-        return Arrays.asList(buildingCosts);
+        String uri = gameContentURL + "/buildings/"+ buildingId+"/costs";
+
+        HttpEntity<String> parameters = DigestRest.getHeadersEntity(gameContentURL, username, hashedPassword);
+
+        ResponseEntity<BuildingCostInfo[]> buildingCosts = restTemplate.exchange(uri, HttpMethod.GET, parameters, BuildingCostInfo[].class);
+        return Arrays.asList(buildingCosts.getBody());
     }
 }
