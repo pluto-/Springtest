@@ -4,7 +4,9 @@ import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.forms.player.AuctionForm;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.AuctionWrapper;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +34,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/player/trading")
-public class AuctionController {
+public class AuctionController implements InitializingBean {
 
     @Value("${hosts.auction}")
     private String auctionURL;
@@ -41,11 +43,19 @@ public class AuctionController {
     @Value("${hosts.playerresources}")
     private String playerResourcesURL;
 
+    @Value("${subsystem.username}")
+    private String serverUsername;
+
+    @Value("${subsystem.password}")
+    private String serverHashedPassword;
+
+    private DigestRestTemplate gameContentRestTemplate;
+    private DigestRestTemplate playerResourcesRestTemplate;
+    private DigestRestTemplate auctionRestTemplate;
 
     @RequestMapping("")
     public Object getAuctions() {
-        RestTemplate restTemplate = new RestTemplate();
-        List<AuctionWrapper> auctions = Arrays.asList(restTemplate.getForObject(auctionURL, AuctionWrapper[].class));
+        List<AuctionWrapper> auctions = Arrays.asList(auctionRestTemplate.get(auctionURL, AuctionWrapper[].class).getBody());
         ModelAndView modelAndView = new ModelAndView("player/auctions");
         modelAndView.addObject("auctions", auctions);
         return modelAndView;
@@ -55,22 +65,20 @@ public class AuctionController {
     public Object buy(@PathVariable Integer id) throws SQLException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getForObject(auctionURL + "/" + userAuth.getPlayerId() + "/buy/" + id, String.class);
+        auctionRestTemplate.get(auctionURL + "/" + userAuth.getPlayerId() + "/buy/" + id, String.class);
         return new RedirectView("/player/trading");
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newAuction() throws SQLException {
-        RestTemplate restTemplate = new RestTemplate();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
-        List<ResourceInfo> resourceInfos = Arrays.asList(restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class));
+        List<ResourceInfo> resourceInfos = Arrays.asList(gameContentRestTemplate.get(gamecontentURL + "/resources", ResourceInfo[].class).getBody());
         Map<Integer, String> resources = new HashMap<>();
         for(ResourceInfo resource : resourceInfos) {
             resources.put(resource.getId(), resource.getName());
         }
-        List<Resource> playerResources = Arrays.asList(restTemplate.getForObject(playerResourcesURL + "/" + userAuth.getPlayerId() +  "/resources", Resource[].class));
+        List<Resource> playerResources = Arrays.asList(playerResourcesRestTemplate.get(playerResourcesURL + "/" + userAuth.getPlayerId() +  "/resources", Resource[].class).getBody());
         ModelAndView modelAndView = new ModelAndView("player/auctionNew");
         modelAndView.addObject("resources", resources);
         modelAndView.addObject("playerResources", playerResources);
@@ -97,8 +105,14 @@ public class AuctionController {
         wrapper.setOfferResourceId(form.getOfferedResourceId());
         wrapper.setOfferAmount(form.getOfferedAmount());
         wrapper.setSellerId(userAuth.getPlayerId());
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(auctionURL + "/new", wrapper, String.class);
+        ResponseEntity<String> responseEntity = auctionRestTemplate.post(auctionURL + "/new", wrapper, String.class);
         return new RedirectView("/player/trading");
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        gameContentRestTemplate = new DigestRestTemplate(gamecontentURL, serverUsername, serverHashedPassword);
+        playerResourcesRestTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
+        auctionRestTemplate = new DigestRestTemplate(auctionURL, serverUsername, serverHashedPassword);
     }
 }
