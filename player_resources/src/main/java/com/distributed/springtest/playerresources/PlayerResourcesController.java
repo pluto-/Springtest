@@ -2,12 +2,13 @@ package com.distributed.springtest.playerresources;
 
 import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.security.DigestHandler;
-import com.distributed.springtest.utils.security.DigestRest;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.playerresources.Construction;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,12 +31,14 @@ import java.util.Map;
  * Created by Jonas on 2014-12-05.
  */
 @RestController
-public class PlayerResourcesController {
+public class PlayerResourcesController implements InitializingBean {
 
     static private String gameContentURL;
     static protected DigestHandler digestHandler;
     static private String username;
     static private String hashedPassword;
+
+    static private DigestRestTemplate gameContentRestTemplate;
 
     @Value("${hosts.gamecontent}")
     public void setGameContentURLName(String gameContentURL) {
@@ -50,12 +54,12 @@ public class PlayerResourcesController {
         }
     }
 
-    @Value("${username}")
+    @Value("${subsystem.username}")
     public void setUsername(String username) {
         PlayerResourcesController.username = username;
     }
 
-    @Value("${password}")
+    @Value("${subsystem.password}")
     public void setHashedPassword(String password) {
         PlayerResourcesController.hashedPassword = password;
     }
@@ -319,12 +323,8 @@ public class PlayerResourcesController {
     }
 
     static private Map<Integer, BuildingInfo> getBuildingsInfo() throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
         String uri = gameContentURL + "/buildings";
-
-        HttpEntity<String> parameters = DigestRest.getHeadersEntity(gameContentURL, username, hashedPassword);
-
-        ResponseEntity<BuildingInfo[]> buildingInfos = restTemplate.exchange(uri, HttpMethod.GET, parameters, BuildingInfo[].class);
+        ResponseEntity<BuildingInfo[]> buildingInfos = gameContentRestTemplate.get(uri, BuildingInfo[].class);
 
         Map<Integer, BuildingInfo> buildingInfoMap = new HashMap<>();
         for(BuildingInfo buildingInfo : buildingInfos.getBody()) {
@@ -334,12 +334,14 @@ public class PlayerResourcesController {
     }
 
     static private List<BuildingCostInfo> getBuildingCost(int buildingId) throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
         String uri = gameContentURL + "/buildings/"+ buildingId+"/costs";
 
-        HttpEntity<String> parameters = DigestRest.getHeadersEntity(gameContentURL, username, hashedPassword);
-
-        ResponseEntity<BuildingCostInfo[]> buildingCosts = restTemplate.exchange(uri, HttpMethod.GET, parameters, BuildingCostInfo[].class);
+        ResponseEntity<BuildingCostInfo[]> buildingCosts = gameContentRestTemplate.get(uri, BuildingCostInfo[].class);
         return Arrays.asList(buildingCosts.getBody());
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        gameContentRestTemplate = new DigestRestTemplate(gameContentURL, username, hashedPassword);
     }
 }

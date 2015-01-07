@@ -16,7 +16,7 @@ import java.net.URLClassLoader;
  */
 @ComponentScan
 @EnableAutoConfiguration
-@PropertySource("classpath:playerresources.properties")
+//@PropertySource("classpath:application.properties")
 public class PlayerResources {
 
     public static void main(String[] args) {
