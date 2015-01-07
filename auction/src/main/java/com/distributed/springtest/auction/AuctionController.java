@@ -3,10 +3,12 @@ package com.distributed.springtest.auction;
 import com.distributed.springtest.auction.records.Auction;
 import com.distributed.springtest.auction.records.CompletedAuction;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.AuctionWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ import java.util.*;
  * Created by Patrik on 2014-12-16.
  */
 @RestController
-public class AuctionController {
+public class AuctionController implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(AuctionController.class);
 
@@ -29,15 +31,22 @@ public class AuctionController {
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
+    @Value("${subsystems.username}")
+    private String subsystemUsername;
+    @Value("${subsystems.password}")
+    private String subsystemPassword;
+    
+    private static DigestRestTemplate playerResourcesRestTemplate;
+    private static DigestRestTemplate gameContentRestTemplate;
+
     @RequestMapping("/new")
     public ResponseEntity<String> newAuction(@RequestBody AuctionWrapper incomingAuction) {
         logger.info("new auction");
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(incomingAuction.getSellerId());
         wrapper.setResourceId(incomingAuction.getOfferResourceId());
-        wrapper.setResourceAmount(-1 * incomingAuction.getOfferAmount());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        wrapper.setResourceAmount((double)(-1 * incomingAuction.getOfferAmount()));
+        playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         try {
             logger.info("starting auction creation");
             Auction auction = new Auction();
@@ -53,7 +62,7 @@ public class AuctionController {
             logger.error("auction creation failed");
             //TODO Discuss in report about what happens if playerresources crashes here
             wrapper.setResourceAmount(-1 * wrapper.getResourceAmount());
-            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+            playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         }
         return new ResponseEntity<String>("Ok.", HttpStatus.OK);
     }
@@ -61,8 +70,7 @@ public class AuctionController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<List<AuctionWrapper>> getAuctions() throws SQLException {
         List<Auction> auctions = Auction.selectAll(Auction.class, "SELECT * FROM auctions WHERE enabled = true AND completed = false");
-        RestTemplate restTemplate = new RestTemplate();
-        List<ResourceInfo> resources = Arrays.asList(restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class));
+        List<ResourceInfo> resources = Arrays.asList(gameContentRestTemplate.get(gamecontentURL + "/resources", ResourceInfo[].class).getBody());
         Map<Integer, String> resourceNames = new HashMap<>();
         for(ResourceInfo resource : resources) {
             resourceNames.put(resource.getId(), resource.getName());
@@ -89,9 +97,8 @@ public class AuctionController {
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(playerId);
         wrapper.setResourceId(auction.getDemandResourceId());
-        wrapper.setResourceAmount(-1 * auction.getDemandAmount());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        wrapper.setResourceAmount((double)(-1 * auction.getDemandAmount()));
+        playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         try {
             auction.setBuyerId(playerId);
             auction.setEnabled(false);
@@ -103,8 +110,14 @@ public class AuctionController {
             completedAuction.transaction().commit();
         } catch (SQLException e) {
             wrapper.setResourceAmount(-1 * wrapper.getResourceAmount());
-            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+            playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         }
         return new ResponseEntity<String>("Ok.", HttpStatus.OK);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        playerResourcesRestTemplate = new DigestRestTemplate(playerResourcesURL, subsystemUsername, subsystemPassword);
+        gameContentRestTemplate = new DigestRestTemplate(gamecontentURL, subsystemUsername, subsystemPassword);
     }
 }

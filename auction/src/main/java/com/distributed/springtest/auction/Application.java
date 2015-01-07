@@ -6,28 +6,33 @@ package com.distributed.springtest.auction;
 
 import com.distributed.springtest.auction.records.Auction;
 import com.distributed.springtest.auction.records.CompletedAuction;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.sql.SQLException;
 import java.util.List;
 
 @ComponentScan
 @EnableAutoConfiguration
-public class Application {
+public class Application implements InitializingBean {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
 
     private static String playerResourcesURL;
+    private static DigestRestTemplate restTemplate;
+
+    @Value("${subsystems.username}")
+    private String subsystemUsername;
+    @Value("${subsystems.password}")
+    private String subsystemPassword;
 
     @Value("${hosts.playerresources}")
     public void setPlayerResourcesURL(String playerResourcesURL) {
@@ -47,10 +52,9 @@ public class Application {
                 logger.info("Processing " + auctions.size() + " completed auctions");
                 for(CompletedAuction completedAuction : auctions) {
                     Auction auction = Auction.findById(Auction.class, completedAuction.getId());
-                    RestTemplate restTemplate = new RestTemplate();
                     try {
                         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
-                        wrapper.setResourceAmount(auction.getOfferAmount());
+                        wrapper.setResourceAmount((double)auction.getOfferAmount());
                         wrapper.setResourceId(auction.getOfferResourceId());
                         wrapper.setPlayerId(auction.getCompleted() ? auction.getBuyerId() : auction.getSellerId());
                         completedAuction.setProcessed(true);
@@ -72,5 +76,10 @@ public class Application {
             } catch (InterruptedException e) {
             }
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        restTemplate = new DigestRestTemplate(playerResourcesURL, subsystemUsername, subsystemPassword);
     }
 }
