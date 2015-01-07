@@ -51,15 +51,15 @@ public class Application implements InitializingBean {
                 List<CompletedAuction> auctions = CompletedAuction.selectAll(CompletedAuction.class, "SELECT * FROM completed_auctions WHERE processed = false");
                 logger.info("Processing " + auctions.size() + " completed auctions");
                 for(CompletedAuction completedAuction : auctions) {
-                    Auction auction = Auction.findById(Auction.class, completedAuction.getId());
+                    Auction auction = Auction.findById(Auction.class, completedAuction.getAuctionId());
                     try {
                         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
                         wrapper.setResourceAmount((double)auction.getOfferAmount());
                         wrapper.setResourceId(auction.getOfferResourceId());
                         wrapper.setPlayerId(auction.getCompleted() ? auction.getBuyerId() : auction.getSellerId());
+                        restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
                         completedAuction.setProcessed(true);
                         completedAuction.save();
-                        restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
                         completedAuction.transaction().commit();
                         logger.info("Processed auction id:" + auction.getId());
                     } catch (SQLException | HttpClientErrorException e) {
