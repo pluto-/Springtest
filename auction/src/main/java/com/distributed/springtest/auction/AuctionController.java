@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
@@ -122,7 +123,11 @@ public class AuctionController implements InitializingBean {
         wrapper.setPlayerId(playerId);
         wrapper.setResourceId(auction.getDemandResourceId());
         wrapper.setResourceAmount((double)(-1 * auction.getDemandAmount()));
-        playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        try {
+            playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<String>(e.getStatusText(), e.getStatusCode());
+        }
         try {
             auction.setBuyerId(playerId);
             auction.setEnabled(false);
