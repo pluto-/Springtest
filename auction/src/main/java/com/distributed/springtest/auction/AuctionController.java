@@ -3,6 +3,7 @@ package com.distributed.springtest.auction;
 import com.distributed.springtest.auction.records.Auction;
 import com.distributed.springtest.auction.records.CompletedAuction;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
+import com.distributed.springtest.utils.security.DigestHandler;
 import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.AuctionWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -25,6 +29,8 @@ import java.util.*;
 public class AuctionController implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(AuctionController.class);
+
+    protected static DigestHandler digestHandler;
 
     @Value("${hosts.playerresources}")
     private String playerResourcesURL;
@@ -38,6 +44,24 @@ public class AuctionController implements InitializingBean {
     
     private static DigestRestTemplate playerResourcesRestTemplate;
     private static DigestRestTemplate gameContentRestTemplate;
+
+    @Value("${digesthandler.path}")
+    public void setDigestHandler(String filePath) {
+        try {
+            AuctionController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/counter")
+    public Object getPlayerResources(HttpServletRequest request) {
+        int counter = digestHandler.getCounter(request.getHeader("username"));
+        if(counter == -1) {
+            return new ResponseEntity<Object>("Username does not exist.", HttpStatus.UNAUTHORIZED);
+        }
+        return counter;
+    }
 
     @RequestMapping("/new")
     public ResponseEntity<String> newAuction(@RequestBody AuctionWrapper incomingAuction) {
