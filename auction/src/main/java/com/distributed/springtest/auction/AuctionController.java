@@ -7,6 +7,7 @@ import com.distributed.springtest.utils.wrappers.AuctionWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,10 @@ public class AuctionController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuctionController.class);
 
-    private static String playerResourcesURL = "http://213.21.115.53:8080";
-    private static String gamecontentURL = "http://94.254.18.40:8080";
+    @Value("${hosts.playerresources}")
+    private String playerResourcesURL;
+    @Value("${hosts.gamecontent}")
+    private String gamecontentURL;
 
     @RequestMapping("/new")
     public ResponseEntity<String> newAuction(@RequestBody AuctionWrapper incomingAuction) {

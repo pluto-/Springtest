@@ -7,13 +7,13 @@ public class PlayerResourceModificationWrapper {
 
     private Integer playerId;
     private Integer resourceId;
-    private Double resourceAmount;
+    private Integer resourceAmount;
 
-    public Double getResourceAmount() {
+    public Integer getResourceAmount() {
         return resourceAmount;
     }
 
-    public void setResourceAmount(Double resourceAmount) {
+    public void setResourceAmount(Integer resourceAmount) {
         this.resourceAmount = resourceAmount;
     }
 
