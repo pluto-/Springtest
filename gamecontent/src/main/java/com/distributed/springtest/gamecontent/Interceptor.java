@@ -27,20 +27,14 @@ public class Interceptor implements HandlerInterceptor {
         String nc = httpServletRequest.getHeader("nc");
         String digest = httpServletRequest.getHeader("digest");
 
-        System.err.println(httpServletRequest.getRequestURI());
         if(httpServletRequest.getRequestURI().equals("/counter")) {
-            System.err.println("TRUE");
             return true;
         }
 
         if(username != null && nc != null && digest != null) {
-            System.err.println(username);
-            System.err.println(nc);
-            System.err.println(digest);
             boolean result = GameContentController.digestHandler.handle(username, Integer.valueOf(nc), digest);
             if(result == false) {
                 httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                System.err.println("FALSE");
                 return false;
             }
 

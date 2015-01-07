@@ -2,6 +2,8 @@ package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.forms.ResourceForm;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,18 +27,25 @@ import java.util.Arrays;
  */
 @Controller
 @RequestMapping("/admin/resources")
-public class ResourcesController {
+public class ResourcesController implements InitializingBean {
 
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
+    @Value("${subsystem.username}")
+    private String serverUsername;
+
+    @Value("${subsystem.password}")
+    private String serverHashedPassword;
+
+    private DigestRestTemplate gameContentRestTemplate;
+
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Object resources(HttpServletRequest request) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("admin/resources");
-        RestTemplate restTemplate = new RestTemplate();
         String uri = gamecontentURL + "/resources";
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(uri, ResourceInfo[].class);
-        modelAndView.addObject("resources", Arrays.asList(resourceInfos));
+        ResponseEntity<ResourceInfo[]> resourceInfos = gameContentRestTemplate.get(uri, ResourceInfo[].class);
+        modelAndView.addObject("resources", Arrays.asList(resourceInfos.getBody()));
         return modelAndView;
     }
 
@@ -44,11 +53,10 @@ public class ResourcesController {
     public Object getResource(@PathVariable Integer id) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("admin/editResource");
 
-        RestTemplate restTemplate = new RestTemplate();
         String uri = gamecontentURL + "/resources/" + id;
-        ResourceInfo resourceInfo = restTemplate.getForObject(uri, ResourceInfo.class);
+        ResponseEntity<ResourceInfo> resourceInfo = gameContentRestTemplate.get(uri, ResourceInfo.class);
 
-        modelAndView.addObject("resource", resourceInfo);
+        modelAndView.addObject("resource", resourceInfo.getBody());
         return modelAndView;
     }
 
@@ -58,8 +66,7 @@ public class ResourcesController {
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setId(id);
         resourceInfo.setName(form.getName());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.put(gamecontentURL + "/resources/edit", resourceInfo, ResourceInfo.class);
+        gameContentRestTemplate.put(gamecontentURL + "/resources/edit", resourceInfo);
         return new RedirectView("/admin/resources/");
     }
 
@@ -69,11 +76,14 @@ public class ResourcesController {
         ResourceInfo resource = new ResourceInfo();
         resource.setName(form.getName());
 
-        RestTemplate restTemplate = new RestTemplate();
         String uri = gamecontentURL + "/resources/add";
-        ResponseEntity<Integer> resourceId = restTemplate.postForEntity(uri, resource, Integer.class);
+        ResponseEntity<Integer> resourceId = gameContentRestTemplate.post(uri, resource, Integer.class);
 
         return new RedirectView("/admin/resources");
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        gameContentRestTemplate = new DigestRestTemplate(gamecontentURL, serverUsername, serverHashedPassword);
+    }
 }

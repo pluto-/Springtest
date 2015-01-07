@@ -10,34 +10,41 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by Jonas on 2015-01-06.
  */
-public class DigestRestTemplate extends RestTemplate {
+public class DigestRestTemplate {
 
     private String serverURI;
     private String username;
     private String hashedPassword;
+    private RestTemplate template;
 
     public DigestRestTemplate(String serverURI, String username, String hashedPassword) {
         this.serverURI = serverURI;
         this.username = username;
         this.hashedPassword = hashedPassword;
+        template = new RestTemplate();
     }
 
     public <T> ResponseEntity<T> get(String uri, Class<T> responseType) {
         HttpEntity<Object> parameters = getHeadersEntity(serverURI, null, username, hashedPassword);
-        return this.exchange(uri, HttpMethod.GET, parameters, responseType);
+        return template.exchange(uri, HttpMethod.GET, parameters, responseType);
     }
 
     public <T> ResponseEntity<T> post(String uri, Object request, Class<T> responseType) {
         HttpEntity<Object> parameters = getHeadersEntity(serverURI, request, username, hashedPassword);
-        return this.exchange(uri, HttpMethod.POST, parameters, responseType);
+        return template.exchange(uri, HttpMethod.POST, parameters, responseType);
     }
 
     public void put(String uri, Object request) {
         HttpEntity<Object> parameters = getHeadersEntity(serverURI, request, username, hashedPassword);
-        this.put(uri, HttpMethod.PUT, parameters);
+        template.exchange(uri, HttpMethod.PUT, parameters, Class.class);
     }
 
-    private HttpEntity<Object> getHeadersEntity(String serverURI, Object body, String username, String hashedPassword) {
+    public void delete(String uri) {
+        HttpEntity<Object> parameters = getHeadersEntity(serverURI, null, username, hashedPassword);
+        template.exchange(uri, HttpMethod.DELETE, parameters, Class.class);
+    }
+
+    private HttpEntity getHeadersEntity(String serverURI, Object body, String username, String hashedPassword) {
 
         int counter = getCounter(serverURI, username) + 1;
 
@@ -62,9 +69,9 @@ public class DigestRestTemplate extends RestTemplate {
         headers.set("digest", digest);
 
         if(body == null) {
-            return new HttpEntity<Object>("parameters", headers);
+            return new HttpEntity(headers);
         } else {
-            return new HttpEntity<Object>(body, headers);
+            return new HttpEntity(body, headers);
         }
     }
 
@@ -80,4 +87,6 @@ public class DigestRestTemplate extends RestTemplate {
             return nc.getBody();
         }
     }
+
+
 }

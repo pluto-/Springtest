@@ -44,7 +44,6 @@ public class GameContentController {
 
     @RequestMapping("/counter")
     public Object getPlayerResources(HttpServletRequest request) {
-        System.err.println(request.getHeader("username"));
         int counter = digestHandler.getCounter(request.getHeader("username"));
         if(counter == -1) {
             return new ResponseEntity<Object>("Username does not exist.", HttpStatus.UNAUTHORIZED);

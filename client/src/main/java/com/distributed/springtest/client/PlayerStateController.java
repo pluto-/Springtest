@@ -44,10 +44,10 @@ public class PlayerStateController implements InitializingBean {
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
-    @Value("${server.username}")
+    @Value("${subsystem.username}")
     private String serverUsername;
 
-    @Value("${server.password}")
+    @Value("${subsystem.password}")
     private String serverHashedPassword;
 
     private DigestRestTemplate gameContentRestTemplate;

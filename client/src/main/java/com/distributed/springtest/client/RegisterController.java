@@ -11,6 +11,7 @@ import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Construction;
 import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
@@ -59,6 +60,12 @@ public class RegisterController {
 
     @Value("${admin.password}")
     private String adminPassword;
+
+    @Value("${subsystem.username}")
+    private String serverUsername;
+
+    @Value("${subsystem.password}")
+    private String serverHashedPassword;
 
     @RequestMapping(value="/create", method = RequestMethod.GET)
     public Object createGet() throws SQLException {
@@ -115,10 +122,10 @@ public class RegisterController {
             wrapper.setResourceAmount(beginningResourceAmount);
             wrapper.setPlayerId(userAuthentication.getPlayerId());
 
-            RestTemplate restTemplate = new RestTemplate();
+            DigestRestTemplate restTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
 
             try{
-                restTemplate.put(playerResourcesURL + "/resources/modify", wrapper, String.class);
+                restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
 
                 userAuthorization.save();
                 userAuthentication.transaction().commit();
