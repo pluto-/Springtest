@@ -9,9 +9,12 @@ import com.distributed.springtest.auction.records.CompletedAuction;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +27,13 @@ public class Application {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
 
-    private static String playerResourcesURL = "http://213.21.115.53:8080";
+    private static String playerResourcesURL;
+
+    @Value("${hosts.playerresources}")
+    public void setPlayerResourcesURL(String playerResourcesURL) {
+        Application.playerResourcesURL = playerResourcesURL;
+    }
+
     public static void main(String[] args) {
 
         SpringApplication.run(Application.class, args);
