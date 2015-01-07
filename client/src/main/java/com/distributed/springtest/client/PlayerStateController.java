@@ -9,36 +9,25 @@ import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Construction;
 import com.distributed.springtest.utils.records.playerresources.Resource;
+import com.distributed.springtest.utils.security.DigestRestTemplate;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
-import com.sun.deploy.net.HttpResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -54,6 +43,22 @@ public class PlayerStateController {
     @Value("${hosts.gamecontent}")
     private String gamecontentURL;
 
+    @Value("${server.username}")
+    private String serverUsername;
+
+    @Value("${server.password}")
+    private String serverHashedPassword;
+
+    private DigestRestTemplate gameContentRestTemplate;
+    private DigestRestTemplate playerResourcesRestTemplate;
+
+    @PostConstruct
+    public void init() {
+        System.err.println(gamecontentURL+  " " +  playerResourcesURL);
+        gameContentRestTemplate = new DigestRestTemplate(gamecontentURL, serverUsername, serverHashedPassword);
+        playerResourcesRestTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
+    }
+
     @RequestMapping("/state")
      public Object state() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/state");
@@ -61,18 +66,19 @@ public class PlayerStateController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
 
-        RestTemplate restTemplate = new RestTemplate();
-        PlayerStateWrapper wrapper = restTemplate.getForObject(playerResourcesURL + "/state/" + userAuth.getPlayerId(), PlayerStateWrapper.class);
+        DigestRestTemplate restTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
+        ResponseEntity<PlayerStateWrapper> wrapper = restTemplate.get(playerResourcesURL + "/state/" + userAuth.getPlayerId(), PlayerStateWrapper.class);
 
         List<BuildingForm> buildings = new ArrayList<>();
         List<ResourceForm> resources = new ArrayList<>();
         List<ConstructionForm> constructions = new ArrayList<>();
 
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
-        BuildingInfo[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildings", BuildingInfo[].class);
+        restTemplate = new DigestRestTemplate(gamecontentURL, serverUsername, serverHashedPassword);
+        ResponseEntity<ResourceInfo[]> resourceInfos = restTemplate.get(gamecontentURL + "/resources", ResourceInfo[].class);
+        ResponseEntity<BuildingInfo[]> buildingInfos = restTemplate.get(gamecontentURL + "/buildings", BuildingInfo[].class);
 
-        for(Resource resource : wrapper.getResources()) {
-            for(ResourceInfo resourceInfo : resourceInfos) {
+        for(Resource resource : wrapper.getBody().getResources()) {
+            for(ResourceInfo resourceInfo : resourceInfos.getBody()) {
                 if(resourceInfo.getId() == resource.getResourceId()) {
                     ResourceForm form = new ResourceForm();
                     form.setName(resourceInfo.getName());
@@ -82,8 +88,8 @@ public class PlayerStateController {
                 }
             }
         }
-        for(Building building : wrapper.getBuildings()) {
-            for(BuildingInfo buildingInfo : buildingInfos) {
+        for(Building building : wrapper.getBody().getBuildings()) {
+            for(BuildingInfo buildingInfo : buildingInfos.getBody()) {
                 if(buildingInfo.getId() == building.getBuildingId()) {
                     BuildingForm form = new BuildingForm();
                     form.setName(buildingInfo.getName() + " x" + building.getAmount());
@@ -94,8 +100,8 @@ public class PlayerStateController {
                 }
             }
         }
-        for(Construction construction : wrapper.getConstructions()) {
-            for(BuildingInfo buildingInfo : buildingInfos) {
+        for(Construction construction : wrapper.getBody().getConstructions()) {
+            for(BuildingInfo buildingInfo : buildingInfos.getBody()) {
                 if(buildingInfo.getId() == construction.getBuildingId()) {
                     ConstructionForm form = new ConstructionForm();
                     form.setName(buildingInfo.getName());
@@ -123,15 +129,16 @@ public class PlayerStateController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
 
-        RestTemplate restTemplate = new RestTemplate();
-        BuildingInfoWrapper[] buildingInfos = restTemplate.getForObject(gamecontentURL + "/buildingsAndCosts", BuildingInfoWrapper[].class);
+        DigestRestTemplate restTemplate = new DigestRestTemplate(gamecontentURL, serverUsername, serverHashedPassword);
+        ResponseEntity<BuildingInfoWrapper[]> buildingInfos = restTemplate.get(gamecontentURL + "/buildingsAndCosts", BuildingInfoWrapper[].class);
+        ResponseEntity<ResourceInfo[]> resourceInfos = restTemplate.get(gamecontentURL + "/resources", ResourceInfo[].class);
 
-        Resource[] resourcesArray = restTemplate.getForObject(playerResourcesURL + "/" + userAuth.getPlayerId() + "/resources", Resource[].class);
-        ResourceInfo[] resourceInfos = restTemplate.getForObject(gamecontentURL + "/resources", ResourceInfo[].class);
+        restTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
+        ResponseEntity<Resource[]> resourcesArray = restTemplate.get(playerResourcesURL + "/" + userAuth.getPlayerId() + "/resources", Resource[].class);
         List<ResourceForm> resources = new ArrayList<>();
 
-        for(Resource resource : resourcesArray) {
-            for(ResourceInfo resourceInfo : resourceInfos) {
+        for(Resource resource : resourcesArray.getBody()) {
+            for(ResourceInfo resourceInfo : resourceInfos.getBody()) {
                 if(resourceInfo.getId() == resource.getResourceId()) {
                     ResourceForm form = new ResourceForm();
                     form.setName(resourceInfo.getName());
@@ -142,7 +149,7 @@ public class PlayerStateController {
             }
         }
 
-        modelAndView.addObject("buildings", Arrays.asList(buildingInfos));
+        modelAndView.addObject("buildings", Arrays.asList(buildingInfos.getBody()));
         modelAndView.addObject("resources", resources);
 
         return modelAndView;
@@ -156,11 +163,11 @@ public class PlayerStateController {
 
         BuyBuildingWrapper wrapper = new BuyBuildingWrapper(userAuth.getPlayerId(), id);
 
-        RestTemplate restTemplate = new RestTemplate();
+        DigestRestTemplate restTemplate = new DigestRestTemplate(playerResourcesURL, serverUsername, serverHashedPassword);
         ModelAndView modelAndView = new ModelAndView(new RedirectView("/player/buy"));
 
         try {
-            ResponseEntity<String> buy = restTemplate.postForEntity(playerResourcesURL + "/building/buy", wrapper, String.class);
+            ResponseEntity<String> buy = restTemplate.post(playerResourcesURL + "/building/buy", wrapper, String.class);
             session.setAttribute("message", "Building purchased.");
 
         } catch(HttpClientErrorException e) {

@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class DigestHandler {
 
-    Map<String, DigestUser> users;
+    private Map<String, DigestUser> users;
 
     public DigestHandler(InputStream fileStream) throws IOException {
         users = new HashMap<>();
@@ -44,6 +44,7 @@ public class DigestHandler {
     public boolean handle(String username, int nc, String digest) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         // digest should be username:MD5(password):nc
         DigestUser user = users.get(username);
+
         if(user == null || nc <= user.getNc()) {
             return false;
         }

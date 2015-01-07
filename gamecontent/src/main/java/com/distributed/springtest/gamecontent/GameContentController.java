@@ -6,14 +6,19 @@ import com.distributed.springtest.utils.records.gamecontent.BuildingCostInfo;
 import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
 import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
 import com.distributed.springtest.gamecontent.records.Building;
+import com.distributed.springtest.utils.security.DigestHandler;
 import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.jajja.jorm.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,27 @@ import java.util.List;
 public class GameContentController {
 
     private static final Logger logger = LoggerFactory.getLogger(GameContentController.class);
+
+    static protected DigestHandler digestHandler;
+
+    @Value("${digesthandler.path}")
+    public void setDigestHandler(String filePath) {
+        try {
+            GameContentController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/counter")
+    public Object getPlayerResources(HttpServletRequest request) {
+        System.err.println(request.getHeader("username"));
+        int counter = digestHandler.getCounter(request.getHeader("username"));
+        if(counter == -1) {
+            return new ResponseEntity<Object>("Username does not exist.", HttpStatus.UNAUTHORIZED);
+        }
+        return counter;
+    }
 
     @RequestMapping("/buildings")
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
