@@ -123,7 +123,7 @@ public class AuctionController implements InitializingBean {
         wrapper.setResourceId(auction.getDemandResourceId());
         wrapper.setResourceAmount((double)(-1 * auction.getDemandAmount()));
         playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
-        try {
+            try {
             auction.setBuyerId(playerId);
             auction.setEnabled(false);
             auction.setCompleted(true);
