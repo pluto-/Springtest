@@ -50,7 +50,7 @@ public class Application {
                     RestTemplate restTemplate = new RestTemplate();
                     try {
                         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
-                        wrapper.setResourceAmount(auction.getOfferAmount());
+                        wrapper.setResourceAmount((double)auction.getOfferAmount());
                         wrapper.setResourceId(auction.getOfferResourceId());
                         wrapper.setPlayerId(auction.getCompleted() ? auction.getBuyerId() : auction.getSellerId());
                         completedAuction.setProcessed(true);

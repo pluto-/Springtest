@@ -35,7 +35,7 @@ public class AuctionController {
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(incomingAuction.getSellerId());
         wrapper.setResourceId(incomingAuction.getOfferResourceId());
-        wrapper.setResourceAmount(-1 * incomingAuction.getOfferAmount());
+        wrapper.setResourceAmount((double)(-1 * incomingAuction.getOfferAmount()));
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         try {
@@ -89,7 +89,7 @@ public class AuctionController {
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(playerId);
         wrapper.setResourceId(auction.getDemandResourceId());
-        wrapper.setResourceAmount(-1 * auction.getDemandAmount());
+        wrapper.setResourceAmount((double)(-1 * auction.getDemandAmount()));
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
         try {
