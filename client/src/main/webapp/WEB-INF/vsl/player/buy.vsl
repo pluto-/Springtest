@@ -13,16 +13,18 @@
     </thead>
     <tbody>
         #foreach($building in $buildings)
-        <tr>
-            <td>$building.buildingInfo.name</td>
-            <td>$building.buildingInfo.generatedName</td>
-            <td>$building.buildingInfo.generatedAmount</td>
-            <td>#foreach($cost in $building.buildingCosts)
-                $cost.resourceName:$cost.amount
-            #end</td>
-            <td>$building.buildingInfo.buildtime</td>
-            <td><button class="button" onclick="location.href = '$link.getURI()/$building.buildingInfo.id'">Buy</button></td>
-        </tr>
+        <form method="post" action="location.href = '$link.getURI()/$building.buildingInfo.id'">
+            <tr>
+                <td>$building.buildingInfo.name</td>
+                <td>$building.buildingInfo.generatedName</td>
+                <td>$building.buildingInfo.generatedAmount</td>
+                <td>#foreach($cost in $building.buildingCosts)
+                    $cost.resourceName:$cost.amount
+                #end</td>
+                <td>$building.buildingInfo.buildtime</td>
+                <td><input type="submit" class="btn-default" value="Buy"></td>
+            </tr>
+        </form>
         #end
     </tbody>
 </table>
