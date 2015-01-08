@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.resource.spi.work.SecurityContext;
 import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -61,7 +59,7 @@ public class AuctionController implements InitializingBean {
         return modelAndView;
     }
 
-    @RequestMapping("/buy/{id}")
+    @RequestMapping(value = "/buy/{id}", method = RequestMethod.POST)
     public Object buy(@PathVariable Integer id) throws SQLException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
