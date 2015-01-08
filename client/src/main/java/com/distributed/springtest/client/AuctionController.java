@@ -63,7 +63,7 @@ public class AuctionController implements InitializingBean {
     public Object buy(@PathVariable Integer id) throws SQLException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuth = UserAuthentication.select(UserAuthentication.class, "SELECT * FROM user_authentication WHERE username=#1#", username);
-        auctionRestTemplate.get(auctionURL + "/" + userAuth.getPlayerId() + "/buy/" + id, String.class);
+        auctionRestTemplate.post(auctionURL + "/" + userAuth.getPlayerId() + "/buy/" + id, null, String.class);
         return new RedirectView("/player/trading");
     }
 
