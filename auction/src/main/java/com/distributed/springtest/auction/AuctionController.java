@@ -69,9 +69,9 @@ public class AuctionController implements InitializingBean {
     }
 
     /**
-     * Creates a new auction, provided the
-     * @param incomingAuction
-     * @return
+     * Creates a new auction, provided the player has enough of the offered resource
+     * @param incomingAuction wrapper containing information about the auction to be created
+     * @return OK on success, error code on failure
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST)
     public ResponseEntity<String> newAuction(@RequestBody AuctionWrapper incomingAuction) {
@@ -106,6 +106,11 @@ public class AuctionController implements InitializingBean {
         return new ResponseEntity<String>("Ok.", HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all active auctions in the system
+     * @return list containing information about all active auctions in the system
+     * @throws SQLException
+     */
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<List<AuctionWrapper>> getAuctions() throws SQLException {
         List<Auction> auctions = Auction.selectAll(Auction.class, "SELECT * FROM auctions WHERE enabled = true AND completed = false");
@@ -130,6 +135,13 @@ public class AuctionController implements InitializingBean {
         return new ResponseEntity<List<AuctionWrapper>>(resultList, HttpStatus.OK);
     }
 
+    /**
+     * Buys an auction for a player, provided the player has enough of the requested resource.
+     * @param playerId player id of the buyer
+     * @param auctionId auction id of the auction to be purchased
+     * @return OK on success, error code on failure
+     * @throws SQLException
+     */
     @RequestMapping(value = "{playerId}/buy/{auctionId}", method = RequestMethod.POST)
     public ResponseEntity<String> buy(@PathVariable Integer playerId, @PathVariable Integer auctionId) throws SQLException {
         Auction auction = Auction.findById(Auction.class, auctionId);
@@ -158,6 +170,10 @@ public class AuctionController implements InitializingBean {
         return new ResponseEntity<String>("Ok.", HttpStatus.OK);
     }
 
+    /**
+     * Method called after properties have been set by Spring
+     * @throws Exception
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         playerResourcesRestTemplate = new DigestRestTemplate(playerResourcesURL, subsystemUsername, subsystemPassword);
