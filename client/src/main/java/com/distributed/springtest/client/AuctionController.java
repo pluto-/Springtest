@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Patrik on 2014-12-16.
+ * Controller for the auction part of the client site.
  */
 @Controller
 @RequestMapping("/player/trading")
@@ -51,6 +51,10 @@ public class AuctionController implements InitializingBean {
     private DigestRestTemplate playerResourcesRestTemplate;
     private DigestRestTemplate auctionRestTemplate;
 
+    /**
+     * Retreives all available auctions from the auction subsystem and builds a model and view to be presented to the user.
+     * @return the model and view to be presented to the user.
+     */
     @RequestMapping("")
     public Object getAuctions() {
         List<AuctionWrapper> auctions = Arrays.asList(auctionRestTemplate.get(auctionURL, AuctionWrapper[].class).getBody());
@@ -59,6 +63,12 @@ public class AuctionController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Buys an auction, provided the user has enough of the requested resource, redirects the user back to the main auction page.
+     * @param id id of the auction
+     * @return redirect to the main auction page
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buy/{id}", method = RequestMethod.POST)
     public Object buy(@PathVariable Integer id) throws SQLException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -67,6 +77,11 @@ public class AuctionController implements InitializingBean {
         return new RedirectView("/player/trading");
     }
 
+    /**
+     * Retrieves information about the player's available resources and builds a model and view for creating a new auction
+     * @return the model and view for creating a new auction
+     * @throws SQLException
+     */
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newAuction() throws SQLException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -83,6 +98,15 @@ public class AuctionController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Creates a new auction, provided the player has enough of the offered resource.
+     * @param form backing object containing information about the new auction
+     * @param result result of the validation of the backing object
+     * @return If the backing object passes validation, the a redirection to the main auction page is returned,
+     *          otherwise, the model and view of the auction creation page is returned with the values of the
+     *          backing object added.
+     * @throws SQLException
+     */
     @RequestMapping(value = "/new", method = RequestMethod.POST)
     public Object newAuctionx(@ModelAttribute @Valid AuctionForm form, BindingResult result) throws SQLException {
         if(result.hasErrors()) {
@@ -103,7 +127,7 @@ public class AuctionController implements InitializingBean {
         wrapper.setOfferResourceId(form.getOfferedResourceId());
         wrapper.setOfferAmount(form.getOfferedAmount());
         wrapper.setSellerId(userAuth.getPlayerId());
-        ResponseEntity<String> responseEntity = auctionRestTemplate.post(auctionURL + "/new", wrapper, String.class);
+        auctionRestTemplate.post(auctionURL + "/new", wrapper, String.class);
         return new RedirectView("/player/trading");
     }
 

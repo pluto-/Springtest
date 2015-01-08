@@ -184,7 +184,7 @@ public class GameContentController {
      * @throws SQLException
      */
     @RequestMapping(value = "/buildings/add", method = RequestMethod.POST)
-    public void addBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
+    public ResponseEntity<Integer> addBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
         Building building = new Building();
         building.setName(incomingBuildingInfo.getName());
         building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
@@ -193,6 +193,7 @@ public class GameContentController {
         building.save();
         building.transaction().commit();
         logger.info(building.getId() + " - " + building.getName() + " added.");
+        return new ResponseEntity<Integer>(building.getId(), HttpStatus.CREATED);
     }
 
     /**

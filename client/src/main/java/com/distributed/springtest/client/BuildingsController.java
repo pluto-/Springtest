@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Created by Patrik on 2014-12-09.
+ * Controller for the buildings administration part of the client site
  */
 @Controller
 @RequestMapping("/admin/buildings")
@@ -36,7 +36,12 @@ public class BuildingsController implements InitializingBean {
 
     private DigestRestTemplate gameContentRestTemplate;
 
-    @RequestMapping("")
+    /**
+     * Retrieves information about all available building types from the game content subsystem.
+     * @return a model and view containing information about all available building types.
+     * @throws SQLException
+     */
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public Object buildings() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("admin/buildings");
         ResponseEntity<BuildingInfo[]> buildings = gameContentRestTemplate.get(gamecontentURL + "/buildings", BuildingInfo[].class);
@@ -44,6 +49,12 @@ public class BuildingsController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Retreives information about a specified building type and any associated building costs from the game content subsystem.
+     * @param id id of the specified building
+     * @return model and view containing the retrieved information
+     * @throws SQLException
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getBuilding(@PathVariable Integer id) throws SQLException {
         ModelAndView modelAndView = new ModelAndView("admin/editBuilding");
@@ -68,6 +79,14 @@ public class BuildingsController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Modifies a specified building type
+     * @param id id of the specified building
+     * @param form backing object containing updated information about the building type
+     * @param result result of the validation of the backing object
+     * @return redirection to the main building administration page
+     * @throws SQLException
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public Object editBuilding(@PathVariable Integer id, @ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
         BuildingInfo building = new BuildingInfo();
@@ -80,6 +99,13 @@ public class BuildingsController implements InitializingBean {
         return new RedirectView("/admin/buildings", true);
     }
 
+    /**
+     * Adds a building cost to a specified building type
+     * @param id id of the specified building type
+     * @param newCostResourceId resource id for the new cost
+     * @param newCostAmount the amount of the new cost
+     * @return redirection to the building details page of the specified building
+     */
     @RequestMapping(value = "/{id}/addCost", method = RequestMethod.POST)
     public Object addCost(@PathVariable Integer id, @RequestParam Integer newCostResourceId, @RequestParam Integer newCostAmount) {
         System.out.println(id + " " + newCostResourceId + ":" + newCostAmount);
@@ -93,6 +119,14 @@ public class BuildingsController implements InitializingBean {
         return new RedirectView("/admin/buildings/" + id, true);
     }
 
+    /**
+     * Modifies a specified building cost of a specified building type.
+     * @param id id of the specified building type
+     * @param costId id of the specified cost
+     * @param resourceId the new resource id of the cost
+     * @param amount the new amount of the cost
+     * @return redirection to the building details page of the specified building
+     */
     @RequestMapping(value = "/{id}/modifyCost/{costId}", method = RequestMethod.POST)
     public Object modifyCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestParam Integer resourceId, @RequestParam Integer amount) {
         BuildingCostInfo cost = new BuildingCostInfo();
@@ -105,13 +139,23 @@ public class BuildingsController implements InitializingBean {
         return new RedirectView("/admin/buildings/" + id, true);
     }
 
+    /**
+     * Removes a specified building cost from a specified building type
+     * @param id id of the building type
+     * @param costId id of the cost
+     * @return redirection to the building details page of the specified building
+     */
     @RequestMapping(value = "/{id}/removeCost/{costId}")
     public Object removeCost(@PathVariable Integer id, @PathVariable Integer costId) {
         gameContentRestTemplate.delete(gamecontentURL + "/buildings/" + id + "/costs/" + costId + "/delete");
         return new RedirectView("/admin/buildings/" + id, true);
     }
 
-
+    /**
+     * Generates a page for creating a new building type
+     * @return model and view containing all available resource types
+     * @throws SQLException
+     */
     @RequestMapping(value = "/new", method = RequestMethod.GET)
     public Object newBuilding() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("admin/editBuilding");
@@ -125,6 +169,13 @@ public class BuildingsController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Creates a new building type
+     * @param form backing object containing information about the new building type
+     * @param result result of the validation of the backing object
+     * @return Redirection to the building details page of the created building type.
+     * @throws SQLException
+     */
     @RequestMapping(value = "/new", method = RequestMethod.POST)
     public Object newBuildingx(@ModelAttribute @Valid BuildingForm form, BindingResult result) throws SQLException {
         BuildingInfo building = new BuildingInfo();
@@ -133,8 +184,8 @@ public class BuildingsController implements InitializingBean {
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
-        ResponseEntity<Integer> responseEntity = gameContentRestTemplate.post(gamecontentURL + "/buildings/add", building, Integer.class);
-        return new RedirectView("/admin/buildings/" + responseEntity.getBody(), true);
+        ResponseEntity<Integer> response = gameContentRestTemplate.post(gamecontentURL + "/buildings/add", building, null);
+        return new RedirectView("/admin/buildings/" + response.getBody(), true);
     }
 
     @Override
