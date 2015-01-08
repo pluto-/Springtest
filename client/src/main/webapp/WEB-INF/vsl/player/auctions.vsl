@@ -11,12 +11,14 @@
     </thead>
     <tbody>
         #foreach($auction in $auctions)
-        <tr>
-            <td>$auction.createdAt</td>
-            <td>$auction.offerResourceName - $auction.offerAmount</td>
-            <td>$auction.demandResourceName - $auction.demandAmount</td>
-            <td><input type="button" onclick="location.href='$link.setRelative("player/trading/buy/$auction.id")'" value="Buy"></td>
-        </tr>
+        <form method="post" action="$link.setRelative("player/trading/buy/$auction.id")">
+            <tr>
+                <td>$auction.createdAt</td>
+                <td>$auction.offerResourceName - $auction.offerAmount</td>
+                <td>$auction.demandResourceName - $auction.demandAmount</td>
+                <td><input type="submit" class="btn-default" value="Buy"></td>
+            </tr>
+        </form>
         #end
     </tbody>
 </table>

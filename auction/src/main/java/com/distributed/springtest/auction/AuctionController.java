@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileInputStream;
@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Created by Patrik on 2014-12-16.
+ * Controller for the REST API for the auction subsystem.
  */
 @RestController
 public class AuctionController implements InitializingBean {
@@ -54,6 +54,11 @@ public class AuctionController implements InitializingBean {
         }
     }
 
+    /**
+     * Retrieves the current value of the request counter for a certain user
+     * @param request
+     * @return
+     */
     @RequestMapping("/counter")
     public Object getPlayerResources(HttpServletRequest request) {
         int counter = digestHandler.getCounter(request.getHeader("username"));
@@ -63,14 +68,23 @@ public class AuctionController implements InitializingBean {
         return counter;
     }
 
-    @RequestMapping("/new")
+    /**
+     * Creates a new auction, provided the
+     * @param incomingAuction
+     * @return
+     */
+    @RequestMapping(value = "/new", method = RequestMethod.POST)
     public ResponseEntity<String> newAuction(@RequestBody AuctionWrapper incomingAuction) {
         logger.info("new auction");
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(incomingAuction.getSellerId());
         wrapper.setResourceId(incomingAuction.getOfferResourceId());
         wrapper.setResourceAmount((double)(-1 * incomingAuction.getOfferAmount()));
-        playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        try {
+            playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<String>(e.getStatusText(), e.getStatusCode());
+        }
         try {
             logger.info("starting auction creation");
             Auction auction = new Auction();
@@ -87,6 +101,7 @@ public class AuctionController implements InitializingBean {
             //TODO Discuss in report about what happens if playerresources crashes here
             wrapper.setResourceAmount(-1 * wrapper.getResourceAmount());
             playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+            return new ResponseEntity<String>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<String>("Ok.", HttpStatus.OK);
     }
@@ -115,15 +130,19 @@ public class AuctionController implements InitializingBean {
         return new ResponseEntity<List<AuctionWrapper>>(resultList, HttpStatus.OK);
     }
 
-    @RequestMapping("{playerId}/buy/{auctionId}")
+    @RequestMapping(value = "{playerId}/buy/{auctionId}", method = RequestMethod.POST)
     public ResponseEntity<String> buy(@PathVariable Integer playerId, @PathVariable Integer auctionId) throws SQLException {
         Auction auction = Auction.findById(Auction.class, auctionId);
         PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
         wrapper.setPlayerId(playerId);
         wrapper.setResourceId(auction.getDemandResourceId());
         wrapper.setResourceAmount((double)(-1 * auction.getDemandAmount()));
-        playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
-            try {
+        try {
+            playerResourcesRestTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<String>(e.getStatusText(), e.getStatusCode());
+        }
+        try {
             auction.setBuyerId(playerId);
             auction.setEnabled(false);
             auction.setCompleted(true);
