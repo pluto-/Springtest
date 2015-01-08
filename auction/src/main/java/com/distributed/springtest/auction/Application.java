@@ -1,7 +1,8 @@
 package com.distributed.springtest.auction;
 
 /**
- * Created by Patrik on 2014-12-05.
+ * Main class for the auction subsystem.
+ * Starts the rest service and processes completed auctions.
  */
 
 import com.distributed.springtest.auction.records.Auction;
@@ -45,6 +46,9 @@ public class Application implements InitializingBean {
         processAuctions();
     }
 
+    /**
+     * Function for processing completed auctions.
+     */
     public static void processAuctions() {
         while(true) {
             try {
@@ -71,8 +75,8 @@ public class Application implements InitializingBean {
                 e.printStackTrace();
             }
             try {
-                logger.info("Sleeping for 60 seconds");
-                Thread.sleep(60000);
+                logger.info("Sleeping for 15 seconds");
+                Thread.sleep(15000);
             } catch (InterruptedException e) {
             }
         }
