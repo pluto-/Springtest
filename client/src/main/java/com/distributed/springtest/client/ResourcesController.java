@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
+ * An admin site that shows information about the different resources of the game.
+ *
  * Created by Patrik on 2014-12-09.
  */
 @Controller
@@ -40,6 +42,13 @@ public class ResourcesController implements InitializingBean {
 
     private DigestRestTemplate gameContentRestTemplate;
 
+    /**
+     * Creates the model and view containing information about the resources.
+     * @param request
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Object resources(HttpServletRequest request) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("admin/resources");
@@ -49,6 +58,13 @@ public class ResourcesController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * The edit page for a resource. Constructs the model and view containing information about the resource.
+     * @param id id of the resource.
+     * @return model and view.
+     * @throws SQLException
+     * @throws IOException
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Object getResource(@PathVariable Integer id) throws SQLException, IOException {
         ModelAndView modelAndView = new ModelAndView("admin/editResource");
@@ -60,6 +76,15 @@ public class ResourcesController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Is called when a resource is edited. Sends an edit-request to the game content subsystem.
+     * @param id id of the resource.
+     * @param form form containing the new information.
+     * @param result
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public Object editResource(@PathVariable Integer id, @ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
 
@@ -70,6 +95,14 @@ public class ResourcesController implements InitializingBean {
         return new RedirectView("/admin/resources/");
     }
 
+    /**
+     * Called when "Create new resource" is pressed. Sends an "add resource"-request to the game content subsystem.
+     * @param form
+     * @param result
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Object newResource(@ModelAttribute @Valid ResourceForm form, BindingResult result) throws SQLException, IOException {
 
