@@ -64,12 +64,13 @@ public class PlayerResourcesController implements InitializingBean {
         PlayerResourcesController.hashedPassword = password;
     }
 
+    /**
+     * Modifies a resource for the specified player.
+     * @param wrapper wrapper containing information about the resource and amount to be changed.
+     * @return
+     */
     @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
     public Object modifyPlayerResource(@RequestBody PlayerResourceModificationWrapper wrapper) {
-
-        System.err.println("Modifying");
-        System.err.println("ID: " + wrapper.getResourceId());
-        System.err.println("Amount: " + wrapper.getResourceAmount());
 
         try {
 
@@ -83,14 +84,12 @@ public class PlayerResourcesController implements InitializingBean {
                 resource.setResourceId(wrapper.getResourceId());
                 resource.setAmount(0.0);
             }
-            System.err.println("Resource BEFORE: " + resource.getAmount());
 
             if((resource.getAmount() + wrapper.getResourceAmount()) < 0) {
                 return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
             }
 
             resource.setAmount(resource.getAmount() + wrapper.getResourceAmount());
-            System.err.println("Resource AFTER: " + resource.getAmount());
             resource.save();
             resource.transaction().commit();
 
@@ -103,6 +102,12 @@ public class PlayerResourcesController implements InitializingBean {
         }
     }
 
+    /**
+     * Returns the resources of the specified player.
+     *
+     * @param playerId ID of player.
+     * @return
+     */
     @RequestMapping("/{id}/resources")
     public Object getPlayerResources(@PathVariable("id") Integer playerId) {
         try {
@@ -119,6 +124,11 @@ public class PlayerResourcesController implements InitializingBean {
         }
     }
 
+    /**
+     * Returns the digest counter of the user specified in the "username"-header.
+     * @param request the request containing the "username"-header.
+     * @return
+     */
     @RequestMapping("/counter")
     public Object getPlayerResources(HttpServletRequest request) {
         int counter = digestHandler.getCounter(request.getHeader("username"));
@@ -128,6 +138,13 @@ public class PlayerResourcesController implements InitializingBean {
         return counter;
     }
 
+    /**
+     * Returns information about the specified resource of the specified player.
+     *
+     * @param playerId ID of player.
+     * @param resourceId ID of resource.
+     * @return Information about the resource (amount).
+     */
     @RequestMapping("/{player_id}/resources/{resource_id}")
     public Object getPlayerResource(@PathVariable("player_id") Integer playerId, @PathVariable("resource_id") Integer resourceId) {
 
@@ -145,6 +162,12 @@ public class PlayerResourcesController implements InitializingBean {
         }
     }
 
+    /**
+     * Constructs a PlayerStateWrapper containing information about the players resources, buildings and constructions.
+     *
+     * @param playerId ID of player.
+     * @return the wrapper.
+     */
     @RequestMapping("/state/{id}")
     public Object getState(@PathVariable("id") Integer playerId) {
 
@@ -166,6 +189,12 @@ public class PlayerResourcesController implements InitializingBean {
         }
     }
 
+    /**
+     * Attempts to buy a building. If the resources aren't enough a CONFLICT response will be returned.
+     *
+     * @param wrapper contains information about what building the user wants to buy.
+     * @return OK if success, otherwise an error status.
+     */
     @RequestMapping(value="/building/buy",  method= RequestMethod.POST)
     public Object buyBuilding(@RequestBody BuyBuildingWrapper wrapper) {
         List<BuildingCostInfo> costs = null;
@@ -213,6 +242,12 @@ public class PlayerResourcesController implements InitializingBean {
         return new ResponseEntity<Object>("Not enough resources.", HttpStatus.CONFLICT);
     }
 
+    /**
+     * Checks whether the player has enough resources.
+     * @param playerResources the resources of the player.
+     * @param costs the costs.
+     * @return true if enough resources, otherwise false.
+     */
     static private boolean hasEnoughMaterials(List<Resource> playerResources, List<BuildingCostInfo> costs) {
 
         boolean isEnough;
@@ -236,6 +271,13 @@ public class PlayerResourcesController implements InitializingBean {
         return true;
     }
 
+    /**
+     * Updates the resources of a player.
+     *
+     * @param playerId ID of the player.
+     * @throws SQLException
+     * @throws IOException
+     */
     static protected void updatePlayerResources(int playerId) throws SQLException, IOException {
         List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", playerId);
 
