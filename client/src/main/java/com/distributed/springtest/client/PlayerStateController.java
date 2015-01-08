@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -166,7 +167,7 @@ public class PlayerStateController implements InitializingBean {
      * @return
      * @throws SQLException
      */
-    @RequestMapping("/buy/{id}")
+    @RequestMapping(value = "/buy/{id}", method = RequestMethod.POST)
     public Object buy(@PathVariable Integer id, HttpSession session) throws SQLException {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
