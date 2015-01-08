@@ -67,32 +67,33 @@ public class PlayerResourcesController implements InitializingBean {
     @RequestMapping(value="/resources/modify", method=RequestMethod.PUT)
     public Object modifyPlayerResource(@RequestBody PlayerResourceModificationWrapper wrapper) {
 
+        System.err.println("Modifying");
+        System.err.println("ID: " + wrapper.getResourceId());
+        System.err.println("Amount: " + wrapper.getResourceAmount());
+
         try {
 
             updatePlayerResources(wrapper.getPlayerId());
 
-            List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources WHERE player_id = #1#", wrapper.getPlayerId());
+            Resource resource = Resource.select(Resource.class, "SELECT * FROM resources WHERE player_id = #1# AND resource_id = #2#", wrapper.getPlayerId(), wrapper.getResourceId());
 
-            Map<Integer, Resource> resourceMap = new HashMap<>();
-            for(Resource resource : resources) {
-                resourceMap.put(resource.getResourceId(), resource);
-            }
-
-            Resource resource = resourceMap.get(wrapper.getResourceId());
             if(resource == null) {
                 resource = new Resource();
                 resource.setPlayerId(wrapper.getPlayerId());
                 resource.setResourceId(wrapper.getResourceId());
                 resource.setAmount(0.0);
             }
+            System.err.println("Resource BEFORE: " + resource.getAmount());
 
             if((resource.getAmount() + wrapper.getResourceAmount()) < 0) {
                 return new ResponseEntity<Object>("Not enough of that resource.", HttpStatus.CONFLICT);
             }
 
             resource.setAmount(resource.getAmount() + wrapper.getResourceAmount());
+            System.err.println("Resource AFTER: " + resource.getAmount());
             resource.save();
             resource.transaction().commit();
+
 
             return new ResponseEntity<Object>(HttpStatus.OK);
 

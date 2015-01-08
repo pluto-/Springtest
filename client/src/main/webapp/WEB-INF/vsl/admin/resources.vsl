@@ -25,3 +25,4 @@
     </div>
     <button type="submit" class="button">Create new resource</button>
 </form>
+<input type="button" onclick="location.href='$link.setRelative("/")'" value="Back">

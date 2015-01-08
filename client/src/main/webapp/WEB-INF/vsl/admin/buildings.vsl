@@ -24,3 +24,4 @@
         #end
     </tbody>
 </table>
+<input type="button" onclick="location.href='$link.setRelative("/")'" value="Back">
