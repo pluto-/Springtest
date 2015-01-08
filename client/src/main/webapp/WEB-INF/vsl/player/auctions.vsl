@@ -20,5 +20,6 @@
         #end
     </tbody>
 </table>
-<input type="button" onclick="location.href='$link.setRelative("/")'" value="back">
+<input type="button" onclick="location.href='$link.setRelative("/")'" value="Back">
 <input type="button" onclick="location.href='$link.setRelative("player/trading/new")'" value="New">
+<input type="button" onclick="location.href = '$link.setRelative("/player/trading")'" value="Refresh">

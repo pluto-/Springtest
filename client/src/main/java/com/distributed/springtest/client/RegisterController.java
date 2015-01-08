@@ -2,34 +2,17 @@ package com.distributed.springtest.client;
 
 import com.distributed.springtest.client.database.UserAuthentication;
 import com.distributed.springtest.client.database.UserAuthorization;
-import com.distributed.springtest.client.forms.player.BuildingForm;
-import com.distributed.springtest.client.forms.player.ConstructionForm;
-import com.distributed.springtest.client.forms.player.ResourceForm;
 import com.distributed.springtest.client.forms.register.CreateUserForm;
-import com.distributed.springtest.utils.records.gamecontent.BuildingInfo;
-import com.distributed.springtest.utils.records.gamecontent.ResourceInfo;
-import com.distributed.springtest.utils.records.playerresources.Building;
-import com.distributed.springtest.utils.records.playerresources.Construction;
-import com.distributed.springtest.utils.records.playerresources.Resource;
 import com.distributed.springtest.utils.security.DigestRestTemplate;
-import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
-import com.distributed.springtest.utils.wrappers.BuyBuildingWrapper;
 import com.distributed.springtest.utils.wrappers.PlayerResourceModificationWrapper;
-import com.distributed.springtest.utils.wrappers.PlayerStateWrapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
@@ -37,12 +20,10 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
+ * This site is used to create users.
+ *
  * Created by Jonas on 2014-12-11.
  */
 @Controller
@@ -67,6 +48,12 @@ public class RegisterController {
     @Value("${subsystem.password}")
     private String serverHashedPassword;
 
+    /**
+     * User is asked to input username, password and what type of user (admin password is required to make an admin
+     * user).
+     * @return
+     * @throws SQLException
+     */
     @RequestMapping(value="/create", method = RequestMethod.GET)
     public Object createGet() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("register/create");
@@ -79,6 +66,19 @@ public class RegisterController {
         return modelAndView;
     }
 
+    /**
+     * When the user has pressed CREATE after filling in user form, this method is called. It checks if the username
+     * and password is valid and if admin role is selected, it checks the admin password. If everything passes, the
+     * user is created in the database and a request is sent to the player_resources subsystem to give the user
+     * some starting resources.
+     *
+     * @param form contains the username, password, role and adminpass.
+     * @param session is used to write error messages.
+     * @return
+     * @throws SQLException
+     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException
+     */
     @RequestMapping(value="/create", method = RequestMethod.POST)
     public Object createPost(@ModelAttribute @Valid CreateUserForm form, HttpSession session) throws SQLException, UnsupportedEncodingException, NoSuchAlgorithmException {
 

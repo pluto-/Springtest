@@ -21,17 +21,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
 /**
+ * This site shows all the resources, buildings and constructions of the player that has logged in.
+ *
  * Created by Jonas on 2014-12-11.
  */
 @Controller
@@ -53,6 +52,12 @@ public class PlayerStateController implements InitializingBean {
     private DigestRestTemplate gameContentRestTemplate;
     private DigestRestTemplate playerResourcesRestTemplate;
 
+    /**
+     * Builds the model and view for showing resources, buildings and constructions of a player.
+     *
+     * @return the model and view containing information about the resources, buildings and constructions.
+     * @throws SQLException
+     */
     @RequestMapping("/state")
      public Object state() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/state");
@@ -114,6 +119,12 @@ public class PlayerStateController implements InitializingBean {
         return modelAndView;
     }
 
+    /**
+     * Builds the model and view for showing the buy-site where you can buy buildings.
+     *
+     * @return the model and view containing information about buildings available and the resources the player has.
+     * @throws SQLException
+     */
     @RequestMapping("/buy")
     public Object buy() throws SQLException {
         ModelAndView modelAndView = new ModelAndView("player/buy");
@@ -145,6 +156,16 @@ public class PlayerStateController implements InitializingBean {
         return modelAndView;
     }
 
+
+    /**
+     * When a user has clicked the BUY button on some building, this method is called. A buy-request is sent to the
+     * player_resources subsystem. If the player_resources returns a CONFLICT status code, the player does not have
+     * enough resources, and a error message is written.
+     * @param id
+     * @param session
+     * @return
+     * @throws SQLException
+     */
     @RequestMapping("/buy/{id}")
     public Object buy(@PathVariable Integer id, HttpSession session) throws SQLException {
 
