@@ -13,7 +13,7 @@
     </thead>
     <tbody>
         #foreach($building in $buildings)
-        <form method="post" action="location.href = '$link.getURI()/$building.buildingInfo.id'">
+        <form method="post" action="buy/$building.buildingInfo.id">
             <tr>
                 <td>$building.buildingInfo.name</td>
                 <td>$building.buildingInfo.generatedName</td>

@@ -162,9 +162,9 @@ public class PlayerStateController implements InitializingBean {
      * When a user has clicked the BUY button on some building, this method is called. A buy-request is sent to the
      * player_resources subsystem. If the player_resources returns a CONFLICT status code, the player does not have
      * enough resources, and a error message is written.
-     * @param id
-     * @param session
-     * @return
+     * @param id id of building
+     * @param session used to send messages.
+     * @return the link to /player/buy.
      * @throws SQLException
      */
     @RequestMapping(value = "/buy/{id}", method = RequestMethod.POST)
