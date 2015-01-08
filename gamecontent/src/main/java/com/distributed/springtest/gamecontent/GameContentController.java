@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Patrik on 2014-12-05.
+ * Controller for the REST API for the gamecontent subsystem.
  */
 @RestController
 public class GameContentController {
@@ -51,7 +51,12 @@ public class GameContentController {
         return counter;
     }
 
-    @RequestMapping("/buildings")
+    /**
+     * Retreives information about all available building types in the system.
+     * @return list containing information about all available building types in the system.
+     * @throws SQLException
+     */
+    @RequestMapping(value = "/buildings", method = RequestMethod.GET)
     public ResponseEntity<List<BuildingInfo>> getBuildings() throws SQLException {
         List<Building> buildings = Record.selectAll(Building.class, "SELECT b.*, r.name as generated_name FROM buildings b, resources r WHERE b.generated_id = r.id");
         List<BuildingInfo> buildingInfoList = new ArrayList<>();
@@ -68,6 +73,12 @@ public class GameContentController {
         return new ResponseEntity<List<BuildingInfo>>(buildingInfoList, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves detailed information about a specific building type
+     * @param id the id of the building type
+     * @return information about the specified building type
+     * @throws SQLException
+     */
     @RequestMapping("/buildings/{id}")
     public ResponseEntity<BuildingInfo> getBuilding(@PathVariable Integer id) throws SQLException {
         Building building = Building.findById(Building.class, id);
@@ -82,6 +93,12 @@ public class GameContentController {
         return new ResponseEntity<BuildingInfo>(buildingInfo, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves information about costs for a specified building type
+     * @param id the id of the building type
+     * @return list of costs for the specified building type
+     * @throws SQLException
+     */
     @RequestMapping("/buildings/{id}/costs")
     public ResponseEntity<List<BuildingCostInfo>> getBuildingCost(@PathVariable Integer id) throws SQLException {
         List<BuildingCost> buildingCosts = BuildingCost.selectAll(BuildingCost.class, "SELECT bc.*, r.name as resource_name FROM building_costs bc, resources r WHERE building_id = #1# AND bc.resource_id = r.id", id);
@@ -98,6 +115,13 @@ public class GameContentController {
         return new ResponseEntity<List<BuildingCostInfo>>(buildingCostInfoList, HttpStatus.OK);
     }
 
+    /**
+     * Adds a cost to a specified building type
+     * @param id id of the specified building type
+     * @param cost wrapper containing information about the cost to be added
+     * @return OK on success, error code on error
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buildings/{id}/costs/add", method = RequestMethod.POST)
     public ResponseEntity<String> addBuildingCost(@PathVariable Integer id, @RequestBody BuildingCostInfo cost) throws SQLException {
         BuildingCost buildingCost = BuildingCost.select(BuildingCost.class, "SELECT * FROM building_costs WHERE building_id = #1# AND resource_id = #2#", cost.getBuildingId(), cost.getResourceId());
@@ -115,6 +139,13 @@ public class GameContentController {
         }
     }
 
+    /**
+     * Modifies a specified cost for a specified building type
+     * @param id id of the building type
+     * @param costId id of the cost
+     * @param cost wrapper containing updated information for the cost
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buildings/{id}/costs/{costId}/modify", method = RequestMethod.PUT)
     public void modifyBuildingCost(@PathVariable Integer id, @PathVariable Integer costId, @RequestBody BuildingCostInfo cost) throws SQLException {
         BuildingCost buildingCost = BuildingCost.findById(BuildingCost.class, cost.getId());
@@ -126,6 +157,12 @@ public class GameContentController {
         }
     }
 
+    /**
+     * Removes a specified cost from a specified building type
+     * @param id id of the building type
+     * @param costId id of the cost
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buildings/{id}/costs/{costId}/delete", method = RequestMethod.DELETE)
     public void deleteBuildingCost(@PathVariable Integer id, @PathVariable Integer costId) throws SQLException {
         BuildingCost buildingCost  = BuildingCost.findById(BuildingCost.class, costId);
@@ -138,10 +175,14 @@ public class GameContentController {
             } else {
                 logger.error("Building cost ID and building ID mismatch");
             }
-
         }
     }
 
+    /**
+     * Adds a new building type to the system
+     * @param incomingBuildingInfo wrapper containing information about the new building type
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buildings/add", method = RequestMethod.POST)
     public ResponseEntity<Integer> addBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
         Building building = new Building();
@@ -151,9 +192,15 @@ public class GameContentController {
         building.setBuildtime(incomingBuildingInfo.getBuildtime());
         building.save();
         building.transaction().commit();
-        return new ResponseEntity<Integer>(building.getId(), HttpStatus.OK);
+        logger.info(building.getId() + " - " + building.getName() + " added.");
+        return new ResponseEntity<Integer>(building.getId(), HttpStatus.CREATED);
     }
 
+    /**
+     * Modifies an existing building type
+     * @param incomingBuildingInfo wrapper containing updated information for the building type
+     * @throws SQLException
+     */
     @RequestMapping(value = "/buildings/modify", method = RequestMethod.PUT)
     public void modifyBuilding(@RequestBody BuildingInfo incomingBuildingInfo) throws SQLException {
         Building building = Building.findById(Building.class, incomingBuildingInfo.getId());
@@ -163,21 +210,34 @@ public class GameContentController {
             building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
             building.save();
             building.transaction().commit();
+            logger.info("Building " + incomingBuildingInfo.getId() + " - " + incomingBuildingInfo.getName() + " successfully modified");
+
         } else {
-            logger.error("No such building exists");
+            logger.error("Building modification failed - No such building ("
+                    + incomingBuildingInfo.getId() + " - " + incomingBuildingInfo.getName() + ") exists");
         }
     }
 
+    /**
+     * Adds a resource type to the system.
+     * @param incomingResourceInfo wrapper containing information about the new resource type
+     * @throws SQLException
+     */
     @RequestMapping(value = "/resources/add", method = RequestMethod.POST)
-    public Integer addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
+    public void addResource(@RequestBody ResourceInfo incomingResourceInfo) throws SQLException {
         Resource resource = new Resource();
         resource.setName(incomingResourceInfo.getName());
         resource.save();
         resource.transaction().commit();
-        return resource.getId();
+        logger.info("Resource " + resource.getId() + " - " + resource.getName() + " added to the system.");
     }
 
-    @RequestMapping("/resources")
+    /**
+     * Retrieves all available resource types in the system.
+     * @return list containing information about all available resource types.
+     * @throws SQLException
+     */
+    @RequestMapping(value = "/resources", method = RequestMethod.GET)
     public ResponseEntity<List<ResourceInfo>> getResources() throws SQLException {
         List<Resource> resources = Resource.selectAll(Resource.class, "SELECT * FROM resources");
         List<ResourceInfo> resourceInfoList = new ArrayList<>();
@@ -190,6 +250,12 @@ public class GameContentController {
         return new ResponseEntity<List<ResourceInfo>>(resourceInfoList, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves information about a specified resource
+     * @param id id of the resource
+     * @return wrapper containing information about the specified resource
+     * @throws SQLException
+     */
     @RequestMapping("/resources/{id}")
     public ResponseEntity<ResourceInfo> getResource(@PathVariable Integer id) throws SQLException {
         Resource resource = Resource.select(Resource.class, "SELECT * FROM resources WHERE id = #1#", id);
@@ -199,6 +265,11 @@ public class GameContentController {
         return new ResponseEntity<ResourceInfo>(resourceInfo, HttpStatus.OK);
     }
 
+    /**
+     * Modifies a specified resource
+     * @param resourceInfo wrapper containing updated information about the resource
+     * @throws SQLException
+     */
     @RequestMapping(value = "/resources/edit", method = RequestMethod.PUT)
     public void editResource(@RequestBody ResourceInfo resourceInfo) throws SQLException {
         Resource resource = Resource.findById(Resource.class, resourceInfo.getId());
@@ -207,6 +278,11 @@ public class GameContentController {
         resource.transaction().commit();
     }
 
+    /**
+     * Retrieves all available building types and their associated costs in the system.
+     * @return list containing information about all available building types and associated costs.
+     * @throws SQLException
+     */
     @RequestMapping("/buildingsAndCosts")
     public ResponseEntity<List<BuildingInfoWrapper>> getBuildingsAndCosts() throws SQLException {
         List<BuildingInfoWrapper> resultList = new ArrayList<>();

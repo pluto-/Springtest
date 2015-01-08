@@ -1,7 +1,8 @@
 package com.distributed.springtest.gamecontent;
 
 /**
- * Created by Patrik on 2014-12-05.
+ * Main class for the game content subsystem.
+ * Starts the REST service.
  */
 
 import org.springframework.boot.SpringApplication;
@@ -19,11 +20,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class Application extends WebMvcConfigurerAdapter {
 
     public static void main(String[] args) {
-
         SpringApplication.run(Application.class, args);
     }
 
-    @Override
+    /**
+     * Method called by Spring to add an Interceptor for Digest handling.
+     * @param registry
+     */    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new Interceptor());
     }

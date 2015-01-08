@@ -105,5 +105,4 @@ public class Application extends WebMvcConfigurerAdapter implements Initializing
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new Interceptor());
     }
-
 }
