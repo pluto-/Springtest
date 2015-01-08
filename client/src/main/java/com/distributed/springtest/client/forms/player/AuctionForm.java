@@ -1,6 +1,5 @@
 package com.distributed.springtest.client.forms.player;
 
-import javax.enterprise.inject.New;
 import javax.validation.constraints.NotNull;
 
 /**

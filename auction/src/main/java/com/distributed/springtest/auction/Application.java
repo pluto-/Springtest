@@ -16,14 +16,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.sql.SQLException;
 import java.util.List;
 
 @ComponentScan
 @EnableAutoConfiguration
-public class Application implements InitializingBean {
+@EnableWebMvc
+@Configuration
+public class Application extends WebMvcConfigurerAdapter implements InitializingBean {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
 
@@ -82,8 +88,22 @@ public class Application implements InitializingBean {
         }
     }
 
+    /**
+     * Method called after properties have been set by Spring
+     * @throws Exception
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         restTemplate = new DigestRestTemplate(playerResourcesURL, subsystemUsername, subsystemPassword);
     }
+
+    /**
+     * Method called by Spring to add an Interceptor for Digest handling.
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new Interceptor());
+    }
+
 }
