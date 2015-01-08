@@ -8,6 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
+ * This class is used to create RestTemplates containing headers used by digest authentication.
+ *
  * Created by Jonas on 2015-01-06.
  */
 public class DigestRestTemplate {
@@ -44,6 +46,16 @@ public class DigestRestTemplate {
         template.exchange(uri, HttpMethod.DELETE, parameters, Class.class);
     }
 
+    /**
+     * Constructs the header by asking the server what counter it has and uses the counter+1. Adds the username and
+     * creates a digest which is also used as header.
+     *
+     * @param serverURI the URI to the target server. The server must be able to answer to /counter-requests.
+     * @param body the body to be sent (can be null).
+     * @param username the username.
+     * @param hashedPassword the password hashed with MD5.
+     * @return the resulting HttpEntity.
+     */
     private HttpEntity getHeadersEntity(String serverURI, Object body, String username, String hashedPassword) {
 
         int counter = getCounter(serverURI, username) + 1;
@@ -75,6 +87,13 @@ public class DigestRestTemplate {
         }
     }
 
+    /**
+     * Asks the server for it's counter.
+     *
+     * @param serverURI the server URI.
+     * @param username the username.
+     * @return
+     */
     private int getCounter(String serverURI, String username) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

@@ -2,17 +2,15 @@ package com.distributed.springtest.utils.security;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
+ * This class handles the incoming digests. It contains a list of DigestUsers (which contains the username, password
+ * and counter).
+ *
  * Created by Jonas on 2015-01-06.
  */
 public class DigestHandler {
@@ -41,6 +39,17 @@ public class DigestHandler {
         }
     }
 
+    /**
+     * Checks whether the incoming data is correct. Checks whether the username exists, if the nc is greater than the
+     * last one and if the digest is correct.
+     *
+     * @param username the username in the header.
+     * @param nc the counter received. Must be greater than the counter that the DigestHandler has.
+     * @param digest the received digest, will be checks that this is the same as the correct digest.
+     * @return true if all is valid, otherwise false.
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
     public boolean handle(String username, int nc, String digest) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         // digest should be username:MD5(password):nc
         DigestUser user = users.get(username);
