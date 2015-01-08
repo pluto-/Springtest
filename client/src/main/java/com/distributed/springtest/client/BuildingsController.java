@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -90,8 +89,7 @@ public class BuildingsController implements InitializingBean {
         cost.setResourceId(newCostResourceId);
         cost.setAmount(newCostAmount);
         System.out.println(cost.getId() + ":" + cost.getBuildingId() + "-" + cost.getResourceId() + "-" + cost.getAmount());
-        ResponseEntity<String> responseEntity = gameContentRestTemplate.post(gamecontentURL + "/buildings/" + id + "/costs/add", cost, String.class);
-        System.out.println(responseEntity.getStatusCode() + ": " + responseEntity.getBody());
+        gameContentRestTemplate.post(gamecontentURL + "/buildings/" + id + "/costs/add", cost, String.class);
         return new RedirectView("/admin/buildings/" + id, true);
     }
 
