@@ -24,6 +24,15 @@ public class Interceptor implements HandlerInterceptor {
 
     }
 
+    /**
+     * All requests are checked if the digest is correct (except for /counter-requests). The requests must have
+     * "username", "nc" and "digest" as headers. These are sent to the DigestHandler where they are checked.
+     * @param httpServletRequest
+     * @param httpServletResponse
+     * @param o
+     * @return true if authorization succeeded, otherwise false.
+     * @throws Exception
+     */
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
         String username = httpServletRequest.getHeader("username");
