@@ -11,6 +11,7 @@ import com.distributed.springtest.utils.wrappers.BuildingInfoWrapper;
 import com.jajja.jorm.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,20 +27,13 @@ import java.util.List;
  * Controller for the REST API for the gamecontent subsystem.
  */
 @RestController
-public class GameContentController {
+public class GameContentController implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(GameContentController.class);
+    private static final String digestFilePath = "/users.txt";
 
     static protected DigestHandler digestHandler;
 
-    @Value("${digesthandler.path}")
-    public void setDigestHandler(String filePath) {
-        try {
-            GameContentController.digestHandler = new DigestHandler(GameContentController.class.getResourceAsStream(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @RequestMapping("/counter")
     public Object getPlayerResources(HttpServletRequest request) {
@@ -309,5 +303,10 @@ public class GameContentController {
             resultList.add(new BuildingInfoWrapper(buildingInfo, buildingCostInfoList));
         }
         return new ResponseEntity<List<BuildingInfoWrapper>>(resultList, HttpStatus.OK);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        GameContentController.digestHandler = new DigestHandler(GameContentController.class.getResourceAsStream(digestFilePath));
     }
 }

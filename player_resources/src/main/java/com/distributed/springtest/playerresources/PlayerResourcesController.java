@@ -12,10 +12,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -30,6 +33,8 @@ import java.util.Map;
 @RestController
 public class PlayerResourcesController implements InitializingBean {
 
+    private static final String digestFilePath = "/users.txt";
+
     static private String gameContentURL;
     static protected DigestHandler digestHandler;
     static private String username;
@@ -40,15 +45,6 @@ public class PlayerResourcesController implements InitializingBean {
     @Value("${hosts.gamecontent}")
     public void setGameContentURLName(String gameContentURL) {
         PlayerResourcesController.gameContentURL = gameContentURL;
-    }
-
-    @Value("${digesthandler.path}")
-    public void setDigestHandler(String filePath) {
-        try {
-            PlayerResourcesController.digestHandler = new DigestHandler(PlayerResourcesController.class.getResourceAsStream(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Value("${subsystem.username}")
@@ -383,5 +379,6 @@ public class PlayerResourcesController implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         gameContentRestTemplate = new DigestRestTemplate(gameContentURL, username, hashedPassword);
+        PlayerResourcesController.digestHandler = new DigestHandler(PlayerResourcesController.class.getResourceAsStream(digestFilePath));
     }
 }
