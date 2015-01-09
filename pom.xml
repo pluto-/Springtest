@@ -67,8 +67,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -110,7 +111,7 @@
                             <type>war</type>
                             <overWrite>true</overWrite>
                             <outputDirectory>output</outputDirectory>
-                            <destFileName>client.jar</destFileName>
+                            <destFileName>client.war</destFileName>
                         </artifactItem>
                     </artifactItems>
                 </configuration>
