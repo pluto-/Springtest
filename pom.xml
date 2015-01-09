@@ -64,15 +64,47 @@
 
     </dependencies>
 
-    <properties>
-        <start-class>test.hello2.Application</start-class>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>auction</artifactId>
+                            <version>${project.version}</version>
+                            <type>jar</type>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>output</outputDirectory>
+                            <destFileName>auction.jar</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>gamecontent</artifactId>
+                            <version>${project.version}</version>
+                            <type>jar</type>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>output</outputDirectory>
+                            <destFileName>gamecontent.jar</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>player_resources</artifactId>
+                            <version>${project.version}</version>
+                            <type>jar</type>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>output</outputDirectory>
+                            <destFileName>player_resources.jar</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
             </plugin>
         </plugins>
     </build>
