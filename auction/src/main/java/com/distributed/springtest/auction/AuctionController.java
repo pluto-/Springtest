@@ -28,6 +28,7 @@ import java.util.*;
 public class AuctionController implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(AuctionController.class);
+    private static final String digestFilePath = "/users.txt";
 
     protected static DigestHandler digestHandler;
 
@@ -43,15 +44,6 @@ public class AuctionController implements InitializingBean {
     
     private static DigestRestTemplate playerResourcesRestTemplate;
     private static DigestRestTemplate gameContentRestTemplate;
-
-    @Value("${digesthandler.path}")
-    public void setDigestHandler(String filePath) {
-        try {
-            AuctionController.digestHandler = new DigestHandler(AuctionController.class.getResourceAsStream(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Retrieves the current value of the request counter for a certain user
@@ -177,5 +169,6 @@ public class AuctionController implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         playerResourcesRestTemplate = new DigestRestTemplate(playerResourcesURL, subsystemUsername, subsystemPassword);
         gameContentRestTemplate = new DigestRestTemplate(gamecontentURL, subsystemUsername, subsystemPassword);
+        AuctionController.digestHandler = new DigestHandler(AuctionController.class.getResourceAsStream(digestFilePath));
     }
 }
