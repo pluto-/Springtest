@@ -62,19 +62,67 @@ public class Application extends WebMvcConfigurerAdapter implements Initializing
                 logger.info("Processing " + auctions.size() + " completed auctions");
                 for(CompletedAuction completedAuction : auctions) {
                     Auction auction = Auction.findById(Auction.class, completedAuction.getAuctionId());
+                    boolean buyerCompleted = false, sellerCompleted = false;
+                    PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
                     try {
-                        PlayerResourceModificationWrapper wrapper = new PlayerResourceModificationWrapper();
-                        wrapper.setResourceAmount((double)auction.getOfferAmount());
-                        wrapper.setResourceId(auction.getOfferResourceId());
-                        wrapper.setPlayerId(auction.getCompleted() ? auction.getBuyerId() : auction.getSellerId());
-                        restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                        if(auction.getCompleted()) {
+                            wrapper.setResourceAmount((double) auction.getDemandAmount());
+                            wrapper.setResourceId(auction.getDemandResourceId());
+                            wrapper.setPlayerId(auction.getSellerId());
+                            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                            sellerCompleted = true;
+                            wrapper.setResourceAmount((double) auction.getOfferAmount());
+                            wrapper.setResourceId(auction.getOfferResourceId());
+                            wrapper.setPlayerId(auction.getBuyerId());
+                            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                            buyerCompleted = true;
+                        } else {
+                            wrapper.setResourceId(auction.getOfferResourceId());
+                            wrapper.setResourceAmount((double) auction.getOfferAmount());
+                            wrapper.setPlayerId(auction.getSellerId());
+                            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                            sellerCompleted = true;
+                        }
                         completedAuction.setProcessed(true);
                         completedAuction.save();
                         completedAuction.transaction().commit();
                         logger.info("Processed auction id:" + auction.getId());
-                    } catch (SQLException | HttpClientErrorException e) {
+                    } catch (SQLException e1) {
+                        logger.error("Processing failed auction id:" + auction.getId() + " SQL Exception, reverting");
+                        e1.printStackTrace();
+                        if(buyerCompleted) {
+                            wrapper.setPlayerId(auction.getBuyerId());
+                            wrapper.setResourceAmount(auction.getOfferAmount() * -1.0);
+                            wrapper.setResourceId(auction.getOfferResourceId());
+                            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                        }
+                        if(sellerCompleted) {
+                            wrapper.setPlayerId(auction.getSellerId());
+                            if(auction.getCompleted()) {
+                                wrapper.setResourceAmount(auction.getDemandAmount() * -1.0);
+                                wrapper.setResourceId(auction.getDemandResourceId());
+                            } else {
+                                wrapper.setResourceAmount(auction.getOfferAmount() * -1.0);
+                                wrapper.setResourceId(auction.getOfferResourceId());
+                            }
+                            restTemplate.put(playerResourcesURL + "/resources/modify", wrapper);
+                        }
+                    } catch(HttpClientErrorException e) {
                         logger.error("Failed processing auction id:" + auction.getId());
                         e.printStackTrace();
+                        if(auction.getCompleted() && sellerCompleted) {
+                            Auction correctionAuction = new Auction();
+                            correctionAuction.setCompleted(false);
+                            correctionAuction.setEnabled(false);
+                            correctionAuction.setOfferAmount(auction.getDemandAmount() * -1);
+                            correctionAuction.setOfferResourceId(auction.getDemandResourceId());
+                            correctionAuction.setSellerId(auction.getSellerId());
+                            correctionAuction.save();
+                            CompletedAuction correctionCompletedAuction = new CompletedAuction();
+                            correctionCompletedAuction.setAuctionId(correctionAuction.getId());
+                            correctionCompletedAuction.save();
+                            correctionAuction.transaction().commit();
+                        }
                     }
                 }
             } catch (SQLException e) {
