@@ -103,6 +103,15 @@
                             <outputDirectory>output</outputDirectory>
                             <destFileName>player_resources.jar</destFileName>
                         </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>client</artifactId>
+                            <version>${project.version}</version>
+                            <type>war</type>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>output</outputDirectory>
+                            <destFileName>client.jar</destFileName>
+                        </artifactItem>
                     </artifactItems>
                 </configuration>
             </plugin>
