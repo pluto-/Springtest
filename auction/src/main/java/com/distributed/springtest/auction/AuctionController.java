@@ -48,7 +48,8 @@ public class AuctionController implements InitializingBean {
     @Value("${digesthandler.path}")
     public void setDigestHandler(String filePath) {
         try {
-            AuctionController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+            AuctionController.digestHandler = new DigestHandler(AuctionController.class.getResourceAsStream(filePath));
+            System.out.println(digestHandler);
         } catch (IOException e) {
             e.printStackTrace();
         }
