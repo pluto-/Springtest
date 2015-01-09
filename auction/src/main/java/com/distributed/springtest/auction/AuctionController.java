@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -49,7 +48,6 @@ public class AuctionController implements InitializingBean {
     public void setDigestHandler(String filePath) {
         try {
             AuctionController.digestHandler = new DigestHandler(AuctionController.class.getResourceAsStream(filePath));
-            System.out.println(digestHandler);
         } catch (IOException e) {
             e.printStackTrace();
         }

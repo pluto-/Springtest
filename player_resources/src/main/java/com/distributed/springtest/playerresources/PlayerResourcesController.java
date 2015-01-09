@@ -12,13 +12,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import com.distributed.springtest.utils.records.playerresources.Building;
 import com.distributed.springtest.utils.records.playerresources.Resource;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -48,7 +45,7 @@ public class PlayerResourcesController implements InitializingBean {
     @Value("${digesthandler.path}")
     public void setDigestHandler(String filePath) {
         try {
-            PlayerResourcesController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+            PlayerResourcesController.digestHandler = new DigestHandler(PlayerResourcesController.class.getResourceAsStream(filePath));
         } catch (IOException e) {
             e.printStackTrace();
         }

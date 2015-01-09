@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class GameContentController {
     @Value("${digesthandler.path}")
     public void setDigestHandler(String filePath) {
         try {
-            GameContentController.digestHandler = new DigestHandler(new FileInputStream(filePath));
+            GameContentController.digestHandler = new DigestHandler(GameContentController.class.getResourceAsStream(filePath));
         } catch (IOException e) {
             e.printStackTrace();
         }
