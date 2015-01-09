@@ -184,7 +184,7 @@ public class BuildingsController implements InitializingBean {
         building.setBuildtime(form.getBuildtime());
         building.setGeneratedId(form.getGeneratedId());
         building.setGeneratedAmount(form.getGeneratedAmount());
-        ResponseEntity<Integer> response = gameContentRestTemplate.post(gamecontentURL + "/buildings/add", building, null);
+        ResponseEntity<Integer> response = gameContentRestTemplate.post(gamecontentURL + "/buildings/add", building, Integer.class);
         return new RedirectView("/admin/buildings/" + response.getBody(), true);
     }
 
