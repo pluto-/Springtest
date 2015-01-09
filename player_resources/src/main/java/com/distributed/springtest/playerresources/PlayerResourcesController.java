@@ -33,6 +33,8 @@ import java.util.Map;
 @RestController
 public class PlayerResourcesController implements InitializingBean {
 
+    private static final String digestFilePath = "/users.txt";
+
     static private String gameContentURL;
     static protected DigestHandler digestHandler;
     static private String username;
@@ -43,15 +45,6 @@ public class PlayerResourcesController implements InitializingBean {
     @Value("${hosts.gamecontent}")
     public void setGameContentURLName(String gameContentURL) {
         PlayerResourcesController.gameContentURL = gameContentURL;
-    }
-
-    @Value("${digesthandler.path}")
-    public void setDigestHandler(String filePath) {
-        try {
-            PlayerResourcesController.digestHandler = new DigestHandler(new FileInputStream(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Value("${subsystem.username}")
@@ -386,5 +379,6 @@ public class PlayerResourcesController implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         gameContentRestTemplate = new DigestRestTemplate(gameContentURL, username, hashedPassword);
+        PlayerResourcesController.digestHandler = new DigestHandler(PlayerResourcesController.class.getResourceAsStream(digestFilePath));
     }
 }
