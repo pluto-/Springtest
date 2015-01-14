@@ -1,4 +1,4 @@
-<legend>Buildings</legend>
+<legend xmlns="http://www.w3.org/1999/html">Buildings</legend>
 <form role="form" class="form" method="post">
     #if($edit == true)
     <div class="form-group">
@@ -23,7 +23,7 @@
             #end
         </select>
     </div>
-    <div class="form-group">
+    <div class="form-group" style="float: left;">
         <label for="inputGeneratedAmount">Generated Amount: </label>
         <input type="text" id="inputGeneratedAmount" name="generatedAmount" placeholder="Generated Amount" #if($edit == true) value="$esc.html($form.generatedAmount)" #end>
     </div>
@@ -71,5 +71,6 @@
     <label for="InputNewCostAmount">Amount: </label>
     <input type="text" id="InputNewCostAmount" name="newCostAmount" placeholder="Amount">
     <button type="submit" class="btn-default">Add new building cost</button>
+    <input type="button" class="btn-default" onclick='location.href($link.setRelative("admin/buildings")' value="Back">
 </form>
 #end
