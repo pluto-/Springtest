@@ -201,6 +201,7 @@ public class GameContentController implements InitializingBean {
             building.setName(incomingBuildingInfo.getName());
             building.setGeneratedAmount(incomingBuildingInfo.getGeneratedAmount());
             building.setGeneratedId(incomingBuildingInfo.getGeneratedId());
+            building.setBuildtime(incomingBuildingInfo.getBuildtime());
             building.save();
             building.transaction().commit();
             logger.info("Building " + incomingBuildingInfo.getId() + " - " + incomingBuildingInfo.getName() + " successfully modified");
